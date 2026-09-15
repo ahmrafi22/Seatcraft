@@ -1,0 +1,52 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / VS / VS Code
+.idea/
+.vs/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Local agent notes (never committed)
+context.md
+
+# Local config and secrets
+appsettings.Local.json
+appsettings.Development.local.json
+.env
+.env.local
+*.pfx
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Node (frontend)
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# Test artifacts
+TestResults/
+coverage/
+coverage*.json
+coverage*.xml
+*.trx
+
+# OS noise
+.DS_Store
+Thumbs.db
