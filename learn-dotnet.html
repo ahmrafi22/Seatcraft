@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>.NET &amp; C# — From Zero</title>
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#111827; --panel:#141b26; --panel2:#1a2330;
+    --line:#243044; --txt:#e6edf7; --dim:#8fa3bf; --dim2:#64748b;
+    --cyan:#22d3ee; --violet:#a78bfa; --green:#34d399; --amber:#fbbf24; --red:#f87171;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--txt); font-family:var(--sans);
+    line-height:1.65; font-size:16px; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- layout ---------- */
+  .shell{display:flex;min-height:100vh}
+  .side{
+    width:270px;flex:0 0 270px;background:var(--bg2);border-right:1px solid var(--line);
+    padding:22px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .side h1{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim2);margin-bottom:4px}
+  .side .sub{font-size:13px;color:var(--dim2);margin-bottom:20px}
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav button{
+    all:unset;cursor:pointer;display:flex;gap:10px;align-items:center;
+    padding:8px 10px;border-radius:8px;font-size:14px;color:var(--dim);
+    transition:background .15s,color .15s;
+  }
+  .nav button:hover{background:var(--panel);color:var(--txt)}
+  .nav button.on{background:rgba(34,211,238,.12);color:var(--cyan);font-weight:600}
+  .nav .num{
+    font-family:var(--mono);font-size:11px;color:var(--dim2);
+    width:18px;text-align:right;flex:0 0 18px;
+  }
+  .nav button.on .num{color:var(--cyan)}
+
+  .main{flex:1;min-width:0;padding:36px 40px 120px;max-width:960px}
+  .prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet));width:0;z-index:99;transition:width .2s}
+
+  /* ---------- sections ---------- */
+  section{display:none;animation:fade .28s ease}
+  section.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+  h2{font-size:32px;line-height:1.25;margin-bottom:14px;letter-spacing:-.02em}
+  h3{font-size:20px;margin:32px 0 12px;letter-spacing:-.01em}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--violet)}
+  p{color:var(--dim);margin-bottom:14px}
+  p strong,li strong{color:var(--txt);font-weight:600}
+  ul,ol{margin:0 0 16px 22px;color:var(--dim)}
+  li{margin-bottom:7px}
+
+  .lead{font-size:18px;color:var(--dim);margin-bottom:26px}
+
+  /* ---------- cards ---------- */
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:20px 22px;margin-bottom:16px;
+  }
+  .card.tight{padding:16px 18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .pill{
+    display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;
+    border-radius:999px;border:1px solid var(--line);color:var(--dim);margin-right:6px;
+  }
+  .pill.cy{color:var(--cyan);border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.08)}
+  .pill.vi{color:var(--violet);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.08)}
+  .pill.gr{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+
+  /* ---------- code ---------- */
+  .code{
+    background:#080c13;border:1px solid var(--line);border-radius:10px;
+    font-family:var(--mono);font-size:13.5px;line-height:1.75;
+    overflow:hidden;margin:14px 0 18px;position:relative;
+  }
+  .code .bar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 12px;background:var(--panel2);border-bottom:1px solid var(--line);
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim2);
+  }
+  .code .copy{
+    all:unset;cursor:pointer;font-size:11px;color:var(--dim);padding:2px 8px;
+    border:1px solid var(--line);border-radius:5px;transition:.15s;
+  }
+  .code .copy:hover{color:var(--cyan);border-color:var(--cyan)}
+  .code pre{padding:14px 16px;overflow-x:auto}
+  .code .ln{display:block;padding:0 6px;border-radius:4px;margin:0 -6px}
+  .code.annot .ln{cursor:pointer}
+  .code.annot .ln:hover{background:rgba(34,211,238,.07)}
+  .code.annot .ln.sel{background:rgba(34,211,238,.14);box-shadow:inset 2px 0 0 var(--cyan)}
+
+  .kw{color:#c792ea}      /* keyword */
+  .ty{color:#82aaff}      /* type */
+  .st{color:#c3e88d}      /* string */
+  .nu{color:#f78c6c}      /* number */
+  .cm{color:#546e7a;font-style:italic}
+  .fn{color:#ffcb6b}      /* method */
+  .vr{color:#e6edf7}      /* variable */
+
+  .explain{
+    background:rgba(34,211,238,.06);border-left:3px solid var(--cyan);
+    border-radius:0 8px 8px 0;padding:12px 16px;margin:-8px 0 18px;
+    font-size:14px;color:var(--dim);min-height:52px;
+  }
+  .explain b{color:var(--cyan);font-weight:600}
+  .explain .hint{color:var(--dim2);font-style:italic}
+
+  /* ---------- interactive bits ---------- */
+  .reveal{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:10px;overflow:hidden;
+  }
+  .reveal > button{
+    all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+    width:100%;padding:14px 18px;font-size:15px;color:var(--txt);font-weight:500;
+  }
+  .reveal > button:hover{background:var(--panel2)}
+  .reveal .arrow{color:var(--dim2);transition:transform .2s;font-size:12px}
+  .reveal.open .arrow{transform:rotate(90deg)}
+  .reveal .body{display:none;padding:0 18px 16px;color:var(--dim);font-size:14.5px;border-top:1px solid var(--line);padding-top:14px}
+  .reveal.open .body{display:block}
+
+  /* diagram */
+  .layers{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+  .layer{
+    all:unset;cursor:pointer;display:flex;align-items:center;gap:14px;
+    padding:14px 18px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);transition:.18s;
+  }
+  .layer:hover{border-color:var(--cyan);background:var(--panel2)}
+  .layer.on{border-color:var(--cyan);background:rgba(34,211,238,.09)}
+  .layer .tag{font-family:var(--mono);font-size:11px;color:var(--dim2);flex:0 0 60px}
+  .layer .nm{font-weight:600;font-size:15px;color:var(--txt);flex:0 0 auto}
+  .layer .ds{font-size:13px;color:var(--dim2);margin-left:auto;text-align:right}
+  .layer.on .ds{color:var(--dim)}
+
+  .layerout{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:18px;margin-top:12px;font-size:14.5px;color:var(--dim);min-height:80px;
+  }
+  .layerout b{color:var(--cyan)}
+  .layerout code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:1px 5px;border-radius:4px;color:var(--violet)}
+
+  /* quiz */
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px}
+  .q .qt{font-weight:600;margin-bottom:14px;font-size:15.5px}
+  .opt{
+    all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;
+    padding:11px 14px;border:1px solid var(--line);border-radius:8px;
+    margin-bottom:8px;font-size:14.5px;color:var(--dim);transition:.15s;
+  }
+  .opt:hover{border-color:var(--dim2);color:var(--txt);background:var(--panel2)}
+  .opt.right{border-color:var(--green);background:rgba(52,211,153,.12);color:var(--green)}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red)}
+  .opt:disabled{cursor:default}
+  .q .why{display:none;margin-top:12px;padding:12px 14px;border-radius:8px;background:var(--bg2);font-size:13.5px;color:var(--dim);border-left:2px solid var(--violet)}
+  .q .why.show{display:block}
+  .q .why b{color:var(--violet)}
+  .score{
+    text-align:center;padding:26px;border-radius:12px;
+    background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(167,139,250,.1));
+    border:1px solid var(--line);margin-bottom:18px;
+  }
+  .score .n{font-size:42px;font-weight:700;font-family:var(--mono);color:var(--cyan);line-height:1}
+  .score .l{font-size:13px;color:var(--dim);margin-top:6px;letter-spacing:.1em;text-transform:uppercase}
+
+  .note{
+    border-left:3px solid var(--amber);background:rgba(251,191,36,.06);
+    padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;
+    font-size:14.5px;color:var(--dim);
+  }
+  .note b{color:var(--amber)}
+  .win{border-left-color:var(--green);background:rgba(52,211,153,.06)}
+  .win b{color:var(--green)}
+
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim2);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  td{color:var(--dim)}
+  td code{font-family:var(--mono);font-size:12.5px;color:var(--violet);background:var(--bg2);padding:1px 5px;border-radius:4px}
+  tr:last-child td{border-bottom:none}
+
+  .next{
+    all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+    margin-top:26px;padding:11px 22px;border-radius:9px;font-size:14.5px;font-weight:600;
+    background:var(--cyan);color:#06202a;transition:.18s;
+  }
+  .next:hover{filter:brightness(1.12);transform:translateX(2px)}
+  .next.back{background:transparent;color:var(--dim);border:1px solid var(--line)}
+  .next.back:hover{color:var(--txt);border-color:var(--dim2);transform:none}
+  .navrow{display:flex;gap:10px;align-items:center;margin-top:30px}
+
+  @media(max-width:900px){
+    .shell{flex-direction:column}
+    .side{width:100%;flex:none;height:auto;position:static;border-right:none;border-bottom:1px solid var(--line)}
+    .nav{flex-direction:row;flex-wrap:wrap}
+    .nav button{padding:6px 9px;font-size:13px}
+    .main{padding:26px 18px 80px}
+    h2{font-size:25px}
+  }
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<div class="shell">
+  <aside class="side">
+    <h1>SeatCraft</h1>
+    <div class="sub">.NET &amp; C# from zero</div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <main class="main" id="main">
+
+  <!-- ============ 1 ============ -->
+  <section id="s1" data-title="The big picture">
+    <div class="kicker">Start here</div>
+    <h2>You already built a .NET app. Let's find out what that means.</h2>
+    <p class="lead">You ran commands, files appeared, and an API answered requests. None of it felt like "writing C#". Here's the mental model.</p>
+
+    <h3>Three things with confusingly similar names</h3>
+    <div class="grid3">
+      <div class="card tight">
+        <div class="pill cy">C#</div>
+        <h4 style="margin-top:12px">The language</h4>
+        <p style="font-size:14px;margin:0">The words you type. <code style="font-family:var(--mono);color:var(--violet)">var x = 5;</code><br>Like English.</p>
+      </div>
+      <div class="card tight">
+        <div class="pill vi">.NET</div>
+        <h4 style="margin-top:12px">The runtime</h4>
+        <p style="font-size:14px;margin:0">The engine that executes it. Memory, garbage collection, threads.<br>Like the engine in a car.</p>
+      </div>
+      <div class="card tight">
+        <div class="pill gr">SDK</div>
+        <h4 style="margin-top:12px">The toolkit</h4>
+        <p style="font-size:14px;margin:0">The <code style="font-family:var(--mono);color:var(--violet)">dotnet</code> command. Compiles, runs, restores packages.<br>Like the toolbox.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>The one-line answer for an interview:</b> "C# is the language, .NET is the platform it runs on.
+      C# compiles to IL, and the .NET runtime (the CLR) executes that IL on any OS."
+    </div>
+
+    <h3>What actually happened when you ran the API</h3>
+    <div class="code">
+      <div class="bar"><span>terminal</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm"># 1. Download every library the project needs</span></span><span class="ln"><span class="fn">dotnet</span> restore</span><span class="ln"></span><span class="ln"><span class="cm"># 2. Turn C# text into a .dll the runtime can execute</span></span><span class="ln"><span class="fn">dotnet</span> build</span><span class="ln"></span><span class="ln"><span class="cm"># 3. Start the runtime, load the .dll, open a port</span></span><span class="ln"><span class="fn">dotnet</span> run --project src/SeatCraft.Api</span></pre>
+    </div>
+    <p>Step 2 is the part people miss. <strong>Your C# is never executed directly.</strong> It becomes IL (Intermediate Language) — a lower-level instruction set — and the CLR translates that to machine code as it runs.</p>
+
+    <h3>Why "dotnet" and not "csharp"?</h3>
+    <p>Because .NET supports several languages: C#, F#, VB.NET. All of them compile to the same IL. The tool is named after the platform, not the language. Microsoft's own docs say "ASP.NET Core" (the web framework) — never "C# Core".</p>
+
+    <table>
+      <tr><th>You'll hear</th><th>It means</th></tr>
+      <tr><td><code>.NET 9</code></td><td>The version of the platform. We used 9.</td></tr>
+      <tr><td><code>.NET Framework</code></td><td>The old Windows-only one. Dead. Don't say this.</td></tr>
+      <tr><td><code>.NET Core</code></td><td>The old name for modern .NET. Renamed in 2020.</td></tr>
+      <tr><td><code>ASP.NET Core</code></td><td>The web part of .NET. What your API is.</td></tr>
+      <tr><td><code>CLR</code></td><td>Common Language Runtime. The engine.</td></tr>
+    </table>
+
+    <div class="navrow"><button class="next" data-go="s2">Next: writing C# →</button></div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section id="s2" data-title="C# basics">
+    <div class="kicker">Language</div>
+    <h2>C# in about ten minutes</h2>
+    <p class="lead">Everything below is real code from your project, or a stripped-down version of it.</p>
+
+    <h3>Variables and types</h3>
+    <p>C# is <strong>statically typed</strong> — every variable has a type known at compile time. You can't put text into a number.</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="ty">int</span> <span class="vr">count</span> = <span class="nu">5</span>;                    <span class="cm">// whole number</span></span><span class="ln"><span class="ty">string</span> <span class="vr">name</span> = <span class="st">"Ayesha"</span>;         <span class="cm">// text</span></span><span class="ln"><span class="ty">bool</span> <span class="vr">isActive</span> = <span class="kw">true</span>;           <span class="cm">// true / false</span></span><span class="ln"><span class="ty">double</span> <span class="vr">score</span> = <span class="nu">9.5</span>;            <span class="cm">// decimal number</span></span><span class="ln"><span class="ty">DateTimeOffset</span> <span class="vr">now</span> = <span class="ty">DateTimeOffset</span>.<span class="fn">UtcNow</span>;</span></pre>
+    </div>
+
+    <h4>What is <code style="font-family:var(--mono);color:var(--violet)">var</code>?</h4>
+    <p>It means "figure out the type for me". It is <strong>not</strong> like JavaScript's <code style="font-family:var(--mono);color:var(--violet)">let</code> — the type is still locked.</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">var</span> <span class="vr">count</span> = <span class="nu">5</span>;      <span class="cm">// compiler decides: int</span></span><span class="ln"><span class="vr">count</span> = <span class="st">"hello"</span>;  <span class="cm">// ❌ compile error, not a runtime one</span></span></pre>
+    </div>
+
+    <h3>Click any line below — it explains itself</h3>
+    <div class="code annot" data-explain="e1">
+      <div class="bar"><span>SeatCraft.Domain/Entities/Candidate.cs — simplified</span><button class="copy">copy</button></div>
+      <pre><span class="ln" data-i="0"><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> <span class="ty">Candidate</span> : <span class="ty">TenantEntity</span></span><span class="ln" data-i="1">{</span><span class="ln" data-i="2">    <span class="kw">public</span> <span class="ty">string</span> <span class="vr">Roll</span> { <span class="kw">get</span>; <span class="kw">private</span> <span class="kw">set</span>; } = <span class="ty">string</span>.<span class="ty">Empty</span>;</span><span class="ln" data-i="3"></span><span class="ln" data-i="4">    <span class="kw">public</span> <span class="ty">string</span> <span class="vr">FullName</span> { <span class="kw">get</span>; <span class="kw">private</span> <span class="kw">set</span>; } = <span class="ty">string</span>.<span class="ty">Empty</span>;</span><span class="ln" data-i="5"></span><span class="ln" data-i="6">    <span class="kw">public</span> <span class="kw">static</span> <span class="ty">Candidate</span> <span class="fn">Create</span>(<span class="ty">Guid</span> <span class="vr">tenantId</span>, <span class="ty">string</span> <span class="vr">roll</span>, <span class="ty">string</span> <span class="vr">fullName</span>)</span><span class="ln" data-i="7">    {</span><span class="ln" data-i="8">        <span class="kw">if</span> (<span class="ty">string</span>.<span class="fn">IsNullOrWhiteSpace</span>(<span class="vr">roll</span>))</span><span class="ln" data-i="9">            <span class="kw">throw</span> <span class="kw">new</span> <span class="ty">DomainException</span>(<span class="st">"Candidate roll is required."</span>);</span><span class="ln" data-i="10"></span><span class="ln" data-i="11">        <span class="kw">return</span> <span class="kw">new</span> <span class="ty">Candidate</span></span><span class="ln" data-i="12">        {</span><span class="ln" data-i="13">            <span class="vr">TenantId</span> = <span class="vr">tenantId</span>,</span><span class="ln" data-i="14">            <span class="vr">Roll</span> = <span class="vr">roll</span>.<span class="fn">Trim</span>(),</span><span class="ln" data-i="15">            <span class="vr">FullName</span> = <span class="vr">fullName</span>.<span class="fn">Trim</span>()</span><span class="ln" data-i="16">        };</span><span class="ln" data-i="17">    }</span><span class="ln" data-i="18">}</span></pre>
+    </div>
+    <div class="explain" id="e1"><span class="hint">👆 Click a line of code above.</span></div>
+
+    <h3>Value types vs reference types</h3>
+    <p>The classic interview question. Two ways a variable can hold data:</p>
+    <div class="grid2">
+      <div class="card tight">
+        <div class="pill cy">value type</div>
+        <p style="font-size:14px;margin:10px 0 0">Holds the data <em>itself</em>. Copying copies the data.<br><br>
+        <code style="font-family:var(--mono);color:var(--violet)">int, bool, double, char, DateTime, struct</code><br><br>
+        <code style="font-family:var(--mono);font-size:12.5px">int a = 5; int b = a; b = 9;</code><br>
+        <code style="font-family:var(--mono);font-size:12.5px">// a is still 5</code></p>
+      </div>
+      <div class="card tight">
+        <div class="pill vi">reference type</div>
+        <p style="font-size:14px;margin:10px 0 0">Holds a <em>pointer</em> to the data. Copying copies the pointer.<br><br>
+        <code style="font-family:var(--mono);color:var(--violet)">string, class, record, arrays, List</code><br><br>
+        <code style="font-family:var(--mono);font-size:12.5px">var a = new List&lt;int&gt;();<br>var b = a; b.Add(1);</code><br>
+        <code style="font-family:var(--mono);font-size:12.5px">// a also has 1 now</code></p>
+      </div>
+    </div>
+
+    <h3>Null, and why C# is strict about it</h3>
+    <p>Your project has <code style="font-family:var(--mono);color:var(--violet)">&lt;Nullable&gt;enable&lt;/Nullable&gt;</code> in <code style="font-family:var(--mono);color:var(--violet)">Directory.Build.props</code>. That turns on the compiler telling you when something might be null.</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="ty">string</span> <span class="vr">a</span> = <span class="st">"hi"</span>;     <span class="cm">// cannot be null. Compiler enforces it.</span></span><span class="ln"><span class="ty">string?</span> <span class="vr">b</span> = <span class="kw">null</span>;    <span class="cm">// the ? means "may be null"</span></span><span class="ln"></span><span class="ln"><span class="cm">// Real example from the project:</span></span><span class="ln"><span class="ty">string</span>? <span class="vr">description</span> = exam.<span class="vr">Description</span>;  <span class="cm">// optional field</span></span></pre>
+    </div>
+    <p>This is why you'll see <code style="font-family:var(--mono);color:var(--violet)">string?</code> and <code style="font-family:var(--mono);color:var(--violet)">Guid?</code> scattered through the code. It's the compiler asking you to handle the null case.</p>
+
+    <div class="navrow">
+      <button class="next back" data-go="s1">← Back</button>
+      <button class="next" data-go="s3">Next: classes &amp; objects →</button>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section id="s3" data-title="Classes &amp; objects">
+    <div class="kicker">Object-oriented</div>
+    <h2>Classes, objects, and why yours look weird</h2>
+    <p class="lead">A <strong>class</strong> is a blueprint. An <strong>object</strong> is a thing built from it. That's the whole idea.</p>
+
+    <div class="code">
+      <div class="bar"><span>blueprint vs object</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// class = blueprint</span></span><span class="ln"><span class="kw">public</span> <span class="kw">class</span> <span class="ty">Candidate</span> { <span class="kw">public</span> <span class="ty">string</span> <span class="vr">Roll</span>; }</span><span class="ln"></span><span class="ln"><span class="cm">// object = actual instance</span></span><span class="ln"><span class="kw">var</span> <span class="vr">a</span> = <span class="kw">new</span> <span class="ty">Candidate</span>();  <span class="cm">// one candidate</span></span><span class="ln"><span class="kw">var</span> <span class="vr">b</span> = <span class="kw">new</span> <span class="ty">Candidate</span>();  <span class="cm">// a different one</span></span></pre>
+    </div>
+
+    <h3>The four words you'll see on almost every class</h3>
+    <table>
+      <tr><th>Keyword</th><th>Meaning</th><th>In your project</th></tr>
+      <tr><td><code>public</code></td><td>Anything can use it</td><td>Controllers, services</td></tr>
+      <tr><td><code>private</code></td><td>Only this class</td><td>Setter on <code>Roll</code></td></tr>
+      <tr><td><code>sealed</code></td><td>No subclassing allowed</td><td>Every entity class</td></tr>
+      <tr><td><code>static</code></td><td>Belongs to the class, not an instance</td><td><code>SeatAllocationSolver</code> helpers</td></tr>
+    </table>
+
+    <h3>Why your entities have <code style="font-family:var(--mono);color:var(--violet)">private set</code></h3>
+    <p>Look at this line again:</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">public</span> <span class="ty">string</span> <span class="vr">Roll</span> { <span class="kw">get</span>; <span class="kw">private</span> <span class="kw">set</span>; }</span></pre>
+    </div>
+    <p>It means: <strong>anyone can read <code style="font-family:var(--mono);color:var(--violet)">Roll</code>, but only the class itself can change it.</strong></p>
+    <p>Why? So nobody outside can do this:</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="vr">candidate</span>.<span class="vr">Roll</span> = <span class="st">""</span>;   <span class="cm">// ❌ blocked. Roll can never be empty.</span></span></pre>
+    </div>
+    <p>Instead you must go through a method that validates. That's what <code style="font-family:var(--mono);color:var(--violet)">Create()</code> is for — it's the only door in.</p>
+
+    <div class="note">
+      <b>This is called encapsulation.</b> If an interviewer asks "how do you protect invariants in your domain model?" —
+      the answer is: private setters plus factory methods that validate. That's exactly what you built.
+    </div>
+
+    <h3>Records — the short version</h3>
+    <p>You used <code style="font-family:var(--mono);color:var(--violet)">record</code> a lot for DTOs and solver inputs. A record is a class that gets value equality and immutability for free.</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">record</span> <span class="ty">SeatPlacement</span>(<span class="ty">Guid</span> <span class="vr">CandidateId</span>, <span class="ty">Guid</span> <span class="vr">HallId</span>, <span class="ty">int</span> <span class="vr">Row</span>, <span class="ty">int</span> <span class="vr">Column</span>);</span><span class="ln"></span><span class="ln"><span class="cm">// This one line gives you:</span></span><span class="ln"><span class="cm">//   - a constructor taking all four values</span></span><span class="ln"><span class="cm">//   - read-only properties</span></span><span class="ln"><span class="cm">//   - == that compares values, not memory addresses</span></span><span class="ln"><span class="cm">//   - ToString() that prints all fields</span></span></pre>
+    </div>
+    <p>Compare: two <code style="font-family:var(--mono);color:var(--violet)">class</code> objects with the same data are <em>not</em> equal. Two <code style="font-family:var(--mono);color:var(--violet)">record</code> objects with the same data <em>are</em> equal. That's why the solver tests can compare plans with <code style="font-family:var(--mono);color:var(--violet)">Assert.Equal</code>.</p>
+
+    <div class="navrow">
+      <button class="next back" data-go="s2">← Back</button>
+      <button class="next" data-go="s4">Next: interfaces &amp; DI →</button>
+    </div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section id="s4" data-title="Interfaces &amp; DI">
+    <div class="kicker">Architecture</div>
+    <h2>Interfaces and Dependency Injection</h2>
+    <p class="lead">This is the single most important concept in your codebase, and the most common interview topic at this level.</p>
+
+    <h3>An interface is a contract</h3>
+    <p>It says "whatever implements me must have these methods" — without saying how.</p>
+    <div class="code">
+      <div class="bar"><span>the contract</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">public</span> <span class="kw">interface</span> <span class="ty">IPlanCache</span></span><span class="ln">{</span><span class="ln">    <span class="ty">Task</span>&lt;<span class="ty">T</span>?&gt; <span class="fn">GetAsync</span>&lt;<span class="ty">T</span>&gt;(<span class="ty">string</span> <span class="vr">key</span>);</span><span class="ln">    <span class="ty">Task</span> <span class="fn">SetAsync</span>&lt;<span class="ty">T</span>&gt;(<span class="ty">string</span> <span class="vr">key</span>, <span class="ty">T</span> <span class="vr">value</span>, <span class="ty">TimeSpan</span> <span class="vr">ttl</span>);</span><span class="ln">    <span class="ty">Task</span> <span class="fn">RemoveAsync</span>(<span class="ty">string</span> <span class="vr">key</span>);</span><span class="ln">}</span></pre>
+    </div>
+    <p>Your project has <strong>two</strong> implementations of this exact interface:</p>
+    <div class="grid2">
+      <div class="card tight">
+        <div class="pill cy">InMemoryPlanCache</div>
+        <p style="font-size:14px;margin:10px 0 0">Uses RAM. For local development. No Redis needed.</p>
+      </div>
+      <div class="card tight">
+        <div class="pill vi">DistributedPlanCache</div>
+        <p style="font-size:14px;margin:10px 0 0">Uses Redis. For production, shared across servers.</p>
+      </div>
+    </div>
+    <p><strong>Nothing that uses <code style="font-family:var(--mono);color:var(--violet)">IPlanCache</code> knows or cares which one it gets.</strong> That's the point.</p>
+
+    <h3>Dependency Injection in one picture</h3>
+    <p>Instead of a class creating what it needs, it <em>asks</em> for it. Something else supplies it.</p>
+
+    <div class="code">
+      <div class="bar"><span>❌ without DI — tightly coupled</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">public</span> <span class="kw">class</span> <span class="ty">SeatPlanService</span></span><span class="ln">{</span><span class="ln">    <span class="cm">// this class decides, and is stuck with that decision</span></span><span class="ln">    <span class="kw">private</span> <span class="kw">readonly</span> <span class="ty">DistributedPlanCache</span> <span class="vr">_cache</span> = <span class="kw">new</span> <span class="ty">DistributedPlanCache</span>();</span><span class="ln">}</span></pre>
+    </div>
+
+    <div class="code">
+      <div class="bar"><span>✅ with DI — asks for a contract</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">public</span> <span class="kw">class</span> <span class="ty">SeatPlanService</span>(<span class="ty">ISeatCraftData</span> <span class="vr">data</span>, <span class="ty">IPlanCache</span> <span class="vr">cache</span>)</span><span class="ln">{</span><span class="ln">    <span class="cm">// "give me anything that satisfies IPlanCache"</span></span><span class="ln">    <span class="cm">// it does not know or care whether that's Redis or RAM</span></span><span class="ln">}</span></pre>
+    </div>
+
+    <p>That syntax — parameters right after the class name — is a <strong>primary constructor</strong>. It's C# 12. It saves you writing a constructor and assignment by hand.</p>
+
+    <h3>Where the wiring happens</h3>
+    <p>One file registers everything: <code style="font-family:var(--mono);color:var(--violet)">Infrastructure/DependencyInjection.cs</code></p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// "when someone asks for IPlanCache, give them DistributedPlanCache"</span></span><span class="ln"><span class="vr">services</span>.<span class="fn">AddSingleton</span>&lt;<span class="ty">IPlanCache</span>, <span class="ty">DistributedPlanCache</span>&gt;();</span><span class="ln"></span><span class="ln"><span class="cm">// "when someone asks for ISeatCraftData, build a SeatCraftData"</span></span><span class="ln"><span class="vr">services</span>.<span class="fn">AddScoped</span>&lt;<span class="ty">ISeatCraftData</span>, <span class="ty">SeatCraftData</span>&gt;();</span></pre>
+    </div>
+
+    <h3>Singleton vs Scoped vs Transient</h3>
+    <p>Guaranteed interview question. It's about <strong>how long an object lives</strong>.</p>
+    <table>
+      <tr><th>Lifetime</th><th>Created</th><th>Used for</th></tr>
+      <tr><td><code>AddSingleton</code></td><td>Once, forever</td><td>Cache, config, locks — stateless or shared</td></tr>
+      <tr><td><code>AddScoped</code></td><td>Once per HTTP request</td><td>DbContext, services — the default choice</td></tr>
+      <tr><td><code>AddTransient</code></td><td>Every time it's requested</td><td>Lightweight, stateless helpers</td></tr>
+    </table>
+    <div class="note">
+      <b>The trap question:</b> "Can you inject a Scoped service into a Singleton?"<br>
+      <b>No.</b> The Singleton lives forever; the Scoped one dies after the request. The Singleton would hold a dead object.
+      .NET actually throws an exception at startup if you try.
+    </div>
+
+    <div class="navrow">
+      <button class="next back" data-go="s3">← Back</button>
+      <button class="next" data-go="s5">Next: async/await →</button>
+    </div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section id="s5" data-title="async / await">
+    <div class="kicker">Concurrency</div>
+    <h2>async and await — the part everyone fakes understanding</h2>
+    <p class="lead">Your entire API is async. If you can explain this clearly, you're ahead of most candidates.</p>
+
+    <h3>The problem it solves</h3>
+    <p>When your API asks the database for 5,000 candidates, the server waits. If it <strong>blocks</strong> a thread while waiting, that thread can't serve anyone else. With 100 concurrent users, you run out of threads.</p>
+    <p><code style="font-family:var(--mono);color:var(--violet)">async/await</code> lets the thread <strong>go do other work</strong> while waiting, then come back when the data arrives.</p>
+
+    <div class="code annot" data-explain="e2">
+      <div class="bar"><span>SeatCraft.Application/Exams/ExamService.cs — simplified</span><button class="copy">copy</button></div>
+      <pre><span class="ln" data-i="0"><span class="kw">public</span> <span class="kw">async</span> <span class="ty">Task</span>&lt;<span class="ty">ExamDto</span>&gt; <span class="fn">GetAsync</span>(<span class="ty">Guid</span> <span class="vr">id</span>)</span><span class="ln" data-i="1">{</span><span class="ln" data-i="2">    <span class="kw">var</span> <span class="vr">exam</span> = <span class="kw">await</span> <span class="vr">_data</span>.<span class="vr">Exams</span>.<span class="fn">FindAsync</span>(<span class="vr">id</span>);</span><span class="ln" data-i="3"></span><span class="ln" data-i="4">    <span class="kw">if</span> (<span class="vr">exam</span> <span class="kw">is</span> <span class="kw">null</span>)</span><span class="ln" data-i="5">        <span class="kw">throw</span> <span class="kw">new</span> <span class="ty">NotFoundException</span>(<span class="st">$"Exam {id} was not found."</span>);</span><span class="ln" data-i="6"></span><span class="ln" data-i="7">    <span class="kw">return</span> <span class="vr">_mapper</span>.<span class="fn">ToDto</span>(<span class="vr">exam</span>);</span><span class="ln" data-i="8">}</span></pre>
+    </div>
+    <div class="explain" id="e2"><span class="hint">👆 Click a line above.</span></div>
+
+    <h3>The rules, stated plainly</h3>
+    <ol>
+      <li><strong><code style="font-family:var(--mono);color:var(--violet)">async Task&lt;T&gt;</code></strong> means "this returns a T, but asynchronously". The caller gets a <em>promise</em>, not the value.</li>
+      <li><strong><code style="font-family:var(--mono);color:var(--violet)">await</code></strong> means "pause here, give the thread back, resume when done".</li>
+      <li><strong>Never <code style="font-family:var(--mono);color:var(--violet)">.Result</code> or <code style="font-family:var(--mono);color:var(--violet)">.Wait()</code></strong> — that blocks the thread and can deadlock. It's the #1 async mistake.</li>
+      <li><strong>Async all the way up.</strong> If a method calls an async method, it should be async too.</li>
+    </ol>
+
+    <div class="note">
+      <b>Why the method names end in "Async"?</b> It's a convention, not a rule the compiler enforces.
+      <code style="font-family:var(--mono);color:var(--violet)">FindAsync</code>, <code style="font-family:var(--mono);color:var(--violet)">SaveChangesAsync</code>, <code style="font-family:var(--mono);color:var(--violet)">GetAsync</code>.
+      It tells the caller "you'll need to await this".
+    </div>
+
+    <h3>Why your allocation runs in the background</h3>
+    <p>Solving 5,000 seats takes ~80ms. That's fine for an HTTP request. But the design you built doesn't rely on that — it uses a queue:</p>
+    <div class="code">
+      <div class="bar"><span>the flow</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// 1. HTTP request returns IMMEDIATELY with a run id</span></span><span class="ln"><span class="kw">return</span> <span class="fn">Ok</span>(<span class="kw">new</span> { <span class="vr">id</span> = <span class="vr">run</span>.<span class="vr">Id</span>, <span class="vr">status</span> = <span class="st">"Queued"</span> });</span><span class="ln"></span><span class="ln"><span class="cm">// 2. A BackgroundService picks it up on another thread</span></span><span class="ln"><span class="cm">// 3. Client polls GET /runs/{id} for progress</span></span></pre>
+    </div>
+    <p>That's why the Postman collection had to <em>poll</em> instead of getting the answer in one call.</p>
+
+    <div class="navrow">
+      <button class="next back" data-go="s4">← Back</button>
+      <button class="next" data-go="s6">Next: LINQ →</button>
+    </div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section id="s6" data-title="LINQ">
+    <div class="kicker">Querying</div>
+    <h2>LINQ — SQL for objects</h2>
+    <p class="lead">LINQ lets you filter and transform collections with readable method calls. You used it constantly.</p>
+
+    <div class="code">
+      <div class="bar"><span>C# — the same query, three ways</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// plain loop</span></span><span class="ln"><span class="kw">var</span> <span class="vr">result</span> = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">Candidate</span>&gt;();</span><span class="ln"><span class="kw">foreach</span> (<span class="kw">var</span> <span class="vr">c</span> <span class="kw">in</span> <span class="vr">candidates</span>)</span><span class="ln">    <span class="kw">if</span> (<span class="vr">c</span>.<span class="vr">SubjectGroup</span> == <span class="st">"Science"</span>) <span class="vr">result</span>.<span class="fn">Add</span>(<span class="vr">c</span>);</span><span class="ln"></span><span class="ln"><span class="cm">// LINQ</span></span><span class="ln"><span class="kw">var</span> <span class="vr">result</span> = <span class="vr">candidates</span></span><span class="ln">    .<span class="fn">Where</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">SubjectGroup</span> == <span class="st">"Science"</span>)</span><span class="ln">    .<span class="fn">OrderBy</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">Roll</span>)</span><span class="ln">    .<span class="fn">Select</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">FullName</span>)</span><span class="ln">    .<span class="fn">ToList</span>();</span></pre>
+    </div>
+
+    <p><code style="font-family:var(--mono);color:var(--violet)">c =&gt; c.Roll</code> is a <strong>lambda</strong> — an inline function. Read it as "given c, return c.Roll".</p>
+
+    <h3>The methods worth memorising</h3>
+    <table>
+      <tr><th>Method</th><th>Does</th></tr>
+      <tr><td><code>Where(x =&gt; ...)</code></td><td>Filter — like SQL WHERE</td></tr>
+      <tr><td><code>Select(x =&gt; ...)</code></td><td>Transform — like SQL SELECT</td></tr>
+      <tr><td><code>OrderBy / OrderByDescending</code></td><td>Sort</td></tr>
+      <tr><td><code>FirstOrDefault()</code></td><td>First match, or <code>null</code></td></tr>
+      <tr><td><code>Any(...)</code></td><td>Does at least one match? Returns bool</td></tr>
+      <tr><td><code>Count()</code></td><td>How many</td></tr>
+      <tr><td><code>GroupBy(...)</code></td><td>Group into buckets</td></tr>
+      <tr><td><code>ToList() / ToArray()</code></td><td>Force execution, materialise</td></tr>
+      <tr><td><code>Skip(n) / Take(n)</code></td><td>Pagination</td></tr>
+    </table>
+
+    <h3>The IQueryable vs IEnumerable question</h3>
+    <p>This one separates juniors from mid-level. It's in your JD ("Good understanding of ... LINQ").</p>
+    <div class="grid2">
+      <div class="card tight">
+        <div class="pill cy">IEnumerable</div>
+        <p style="font-size:14px;margin:10px 0 0">Runs <strong>in memory</strong>. Pulls everything first, then filters.<br><br>
+        <span style="color:var(--red)">Slow on big tables.</span></p>
+      </div>
+      <div class="card tight">
+        <div class="pill vi">IQueryable</div>
+        <p style="font-size:14px;margin:10px 0 0">Builds a <strong>SQL query</strong>. Filters run in the database.<br><br>
+        <span style="color:var(--green)">Only matching rows travel.</span></p>
+      </div>
+    </div>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// IQueryable: becomes "SELECT * FROM candidates WHERE Roll LIKE '%R1%'"</span></span><span class="ln"><span class="ty">IQueryable</span>&lt;<span class="ty">Candidate</span>&gt; <span class="vr">q</span> = <span class="vr">db</span>.<span class="vr">Candidates</span>.<span class="fn">Where</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">Roll</span>.<span class="fn">Contains</span>(<span class="st">"R1"</span>));</span><span class="ln"></span><span class="ln"><span class="cm">// IEnumerable: downloads ALL rows, then filters in memory 💀</span></span><span class="ln"><span class="ty">IEnumerable</span>&lt;<span class="ty">Candidate</span>&gt; <span class="vr">q</span> = <span class="vr">db</span>.<span class="vr">Candidates</span>.<span class="fn">ToList</span>().<span class="fn">Where</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">Roll</span>.<span class="fn">Contains</span>(<span class="st">"R1"</span>));</span></pre>
+    </div>
+    <p>The difference is the <code style="font-family:var(--mono);color:var(--violet)">.ToList()</code>. It forces the query to execute <em>before</em> the filter. Same code, wildly different performance.</p>
+
+    <div class="note">
+      <b>This is also the N+1 query problem.</b> If you loop over 100 exams and hit the database inside the loop,
+      you make 101 queries. The fix is to load related data up front with
+      <code style="font-family:var(--mono);color:var(--violet)">Include()</code> or project with <code style="font-family:var(--mono);color:var(--violet)">Select()</code>.
+    </div>
+
+    <div class="navrow">
+      <button class="next back" data-go="s5">← Back</button>
+      <button class="next" data-go="s7">Next: ASP.NET Core →</button>
+    </div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section id="s7" data-title="ASP.NET Core">
+    <div class="kicker">Web</div>
+    <h2>How a request becomes a response</h2>
+    <p class="lead">ASP.NET Core is the web framework. Your API is built from three ideas: middleware, controllers, and DI.</p>
+
+    <h3>1. The middleware pipeline</h3>
+    <p>Every HTTP request passes through a chain of handlers, in order. Each one can act, pass it on, or stop it.</p>
+    <div class="code">
+      <div class="bar"><span>Program.cs — the actual order in your project</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="vr">app</span>.<span class="fn">UseSerilogRequestLogging</span>();          <span class="cm">// 1. log it</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseMiddleware</span>&lt;<span class="ty">ExceptionHandlingMiddleware</span>&gt;(); <span class="cm">// 2. catch errors</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseSwagger</span>();                        <span class="cm">// 3. dev docs</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseAuthentication</span>();               <span class="cm">// 4. who are you? (JWT)</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseMiddleware</span>&lt;<span class="ty">TenantResolutionMiddleware</span>&gt;(); <span class="cm">// 5. which tenant?</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseAuthorization</span>();                <span class="cm">// 6. are you allowed?</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">UseRateLimiter</span>();                  <span class="cm">// 7. slow down abusers</span></span><span class="ln"><span class="vr">app</span>.<span class="fn">MapControllers</span>();                    <span class="cm">// 8. finally, your code</span></span></pre>
+    </div>
+    <div class="note">
+      <b>Order matters, and it's a classic interview question.</b> Authentication must come <em>before</em> authorization —
+      you can't check permissions before you know who the user is. Exception handling goes early so it wraps everything.
+    </div>
+
+    <h3>2. Controllers</h3>
+    <p>A controller is a class with methods that map to URLs. Attributes describe the mapping.</p>
+    <div class="code annot" data-explain="e3">
+      <div class="bar"><span>SeatCraft.Api/Controllers/ExamsController.cs — simplified</span><button class="copy">copy</button></div>
+      <pre><span class="ln" data-i="0">[<span class="ty">Route</span>(<span class="st">"api/exams"</span>)]</span><span class="ln" data-i="1">[<span class="ty">Authorize</span>]</span><span class="ln" data-i="2"><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> <span class="ty">ExamsController</span>(<span class="ty">ExamService</span> <span class="vr">examService</span>) : <span class="ty">ApiControllerBase</span></span><span class="ln" data-i="3">{</span><span class="ln" data-i="4">    [<span class="ty">HttpGet</span>(<span class="st">"{examId:guid}"</span>)]</span><span class="ln" data-i="5">    <span class="kw">public</span> <span class="kw">async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="fn">Get</span>(<span class="ty">Guid</span> <span class="vr">examId</span>)</span><span class="ln" data-i="6">    {</span><span class="ln" data-i="7">        <span class="kw">var</span> <span class="vr">exam</span> = <span class="kw">await</span> <span class="vr">examService</span>.<span class="fn">GetAsync</span>(<span class="vr">examId</span>);</span><span class="ln" data-i="8">        <span class="kw">return</span> <span class="fn">OkJson</span>(<span class="vr">exam</span>);</span><span class="ln" data-i="9">    }</span><span class="ln" data-i="10">}</span></pre>
+    </div>
+    <div class="explain" id="e3"><span class="hint">👆 Click a line above.</span></div>
+
+    <h3>3. The request lifecycle, end to end</h3>
+    <p>Trace one call to <code style="font-family:var(--mono);color:var(--violet)">GET /api/exams/abc</code>:</p>
+    <div class="layers" id="flow">
+      <div class="card tight" style="border-left:3px solid var(--cyan)">
+        <strong style="color:var(--cyan)">1. Kestrel</strong>
+        <p style="font-size:14px;margin:6px 0 0">The web server built into .NET. Accepts the TCP connection.</p>
+      </div>
+      <div class="card tight" style="border-left:3px solid var(--violet)">
+        <strong style="color:var(--violet)">2. Middleware</strong>
+        <p style="font-size:14px;margin:6px 0 0">Logs, checks the JWT, resolves the tenant, checks the rate limit.</p>
+      </div>
+      <div class="card tight" style="border-left:3px solid var(--amber)">
+        <strong style="color:var(--amber)">3. Routing</strong>
+        <p style="font-size:14px;margin:6px 0 0">Matches the URL to <code style="font-family:var(--mono);color:var(--violet)">ExamsController.Get</code>. Binds <code style="font-family:var(--mono);color:var(--violet)">abc</code> to the <code style="font-family:var(--mono);color:var(--violet)">Guid examId</code> parameter.</p>
+      </div>
+      <div class="card tight" style="border-left:3px solid var(--green)">
+        <strong style="color:var(--green)">4. Controller → Service</strong>
+        <p style="font-size:14px;margin:6px 0 0">Calls <code style="font-family:var(--mono);color:var(--violet)">ExamService</code>, which contains the actual logic.</p>
+      </div>
+      <div class="card tight" style="border-left:3px solid var(--cyan)">
+        <strong style="color:var(--cyan)">5. EF Core</strong>
+        <p style="font-size:14px;margin:6px 0 0">Translates LINQ into SQL, queries the database.</p>
+      </div>
+      <div class="card tight" style="border-left:3px solid var(--violet)">
+        <strong style="color:var(--violet)">6. Response</strong>
+        <p style="font-size:14px;margin:6px 0 0">Object → JSON → back through middleware → to the client.</p>
+      </div>
+    </div>
+
+    <h3>HTTP status codes you should know</h3>
+    <table>
+      <tr><th>Code</th><th>Means</th><th>In your API</th></tr>
+      <tr><td><code>200</code></td><td>OK</td><td>Normal GET</td></tr>
+      <tr><td><code>201</code></td><td>Created</td><td>POST /api/exams</td></tr>
+      <tr><td><code>204</code></td><td>No content</td><td>DELETE</td></tr>
+      <tr><td><code>400</code></td><td>Bad request</td><td>Validation failed</td></tr>
+      <tr><td><code>401</code></td><td>Not authenticated</td><td>Missing token</td></tr>
+      <tr><td><code>403</code></td><td>Not allowed</td><td>Operator trying to publish</td></tr>
+      <tr><td><code>404</code></td><td>Not found</td><td>Wrong id, or other tenant's data</td></tr>
+      <tr><td><code>409</code></td><td>Conflict</td><td>Duplicate slug, published plan</td></tr>
+      <tr><td><code>500</code></td><td>Server error</td><td>Unhandled exception</td></tr>
+    </table>
+
+    <div class="navrow">
+      <button class="next back" data-go="s6">← Back</button>
+      <button class="next" data-go="s8">Next: EF Core →</button>
+    </div>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section id="s8" data-title="EF Core">
+    <div class="kicker">Database</div>
+    <h2>EF Core — talking to a database without writing SQL</h2>
+    <p class="lead">EF Core is an ORM: it maps C# classes to database tables. Your JD lists it under "MS SQL Server, PostgreSQL, database design".</p>
+
+    <h3>The mapping</h3>
+    <div class="grid2">
+      <div class="card tight">
+        <div class="pill cy">C#</div>
+        <p style="font-size:14px;margin:10px 0 0">
+          <code style="font-family:var(--mono);color:var(--violet)">class Candidate</code><br>
+          <code style="font-family:var(--mono);color:var(--violet)">string Roll</code><br>
+          <code style="font-family:var(--mono);color:var(--violet)">Guid ExamId</code>
+        </p>
+      </div>
+      <div class="card tight">
+        <div class="pill vi">Database</div>
+        <p style="font-size:14px;margin:10px 0 0">
+          <code style="font-family:var(--mono);color:var(--violet)">table candidates</code><br>
+          <code style="font-family:var(--mono);color:var(--violet)">column Roll</code><br>
+          <code style="font-family:var(--mono);color:var(--violet)">column ExamId</code>
+        </p>
+      </div>
+    </div>
+
+    <h3>The three pieces</h3>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// 1. DbContext — your session with the database</span></span><span class="ln"><span class="kw">public</span> <span class="kw">class</span> <span class="ty">SeatCraftDbContext</span> : <span class="ty">DbContext</span></span><span class="ln">{</span><span class="ln">    <span class="cm">// 2. DbSet — one per table</span></span><span class="ln">    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">Candidate</span>&gt; <span class="vr">Candidates</span> =&gt; <span class="fn">Set</span>&lt;<span class="ty">Candidate</span>&gt;();</span><span class="ln">}</span><span class="ln"></span><span class="ln"><span class="cm">// 3. Querying — LINQ, translated to SQL</span></span><span class="ln"><span class="kw">var</span> <span class="vr">sci</span> = <span class="kw">await</span> <span class="vr">db</span>.<span class="vr">Candidates</span></span><span class="ln">    .<span class="fn">Where</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">ExamId</span> == <span class="vr">examId</span>)</span><span class="ln">    .<span class="fn">OrderBy</span>(<span class="vr">c</span> =&gt; <span class="vr">c</span>.<span class="vr">Roll</span>)</span><span class="ln">    .<span class="fn">ToListAsync</span>();</span></pre>
+    </div>
+
+    <h3>Change tracking — the magic bit</h3>
+    <p>EF Core remembers what you loaded. If you change a property and call <code style="font-family:var(--mono);color:var(--violet)">SaveChanges</code>, it figures out the UPDATE for you.</p>
+    <div class="code">
+      <div class="bar"><span>C#</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="kw">var</span> <span class="vr">exam</span> = <span class="kw">await</span> <span class="vr">db</span>.<span class="vr">Exams</span>.<span class="fn">FindAsync</span>(<span class="vr">id</span>);</span><span class="ln"></span><span class="ln"><span class="vr">exam</span>.<span class="fn">Rename</span>(<span class="st">"New Title"</span>, <span class="kw">null</span>);   <span class="cm">// just change the object</span></span><span class="ln"></span><span class="ln"><span class="kw">await</span> <span class="vr">db</span>.<span class="fn">SaveChangesAsync</span>();          <span class="cm">// EF writes: UPDATE exams SET Title = 'New Title' WHERE Id = ...</span></span></pre>
+    </div>
+
+    <h3>Migrations</h3>
+    <p>A migration is a versioned script that changes the database schema. You generated one:</p>
+    <div class="code">
+      <div class="bar"><span>terminal</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="fn">dotnet</span> ef migrations add InitialCreate</span><span class="ln"><span class="cm"># creates a C# file describing: create tables, indexes, foreign keys</span></span><span class="ln"></span><span class="ln"><span class="cm"># applied automatically at startup in this project</span></span><span class="ln"><span class="kw">await</span> <span class="vr">context</span>.<span class="vr">Database</span>.<span class="fn">MigrateAsync</span>();</span></pre>
+    </div>
+
+    <h3>Why the whole thing is multi-tenant</h3>
+    <p>This is a genuinely senior detail in your project. Every table has a <code style="font-family:var(--mono);color:var(--violet)">TenantId</code>, and EF adds the filter automatically:</p>
+    <div class="code">
+      <div class="bar"><span>SeatCraftDbContext.cs</span><button class="copy">copy</button></div>
+      <pre><span class="ln"><span class="cm">// every query silently becomes:</span></span><span class="ln"><span class="cm">// SELECT * FROM exams WHERE TenantId = @currentTenant</span></span><span class="ln"><span class="kw">foreach</span> (<span class="kw">var</span> <span class="vr">entityType</span> <span class="kw">in</span> <span class="vr">modelBuilder</span>.<span class="vr">Model</span>.<span class="fn">GetEntityTypes</span>())</span><span class="ln">    <span class="vr">modelBuilder</span>.<span class="fn">Entity</span>(<span class="vr">entityType</span>.<span class="vr">ClrType</span>).<span class="fn">HasQueryFilter</span>(...);</span></pre>
+    </div>
+    <p>The benefit: if a developer forgets a <code style="font-family:var(--mono);color:var(--violet)">WHERE</code>, the data still can't leak. Security at the framework level, not the code level.</p>
+
+    <div class="navrow">
+      <button class="next back" data-go="s7">← Back</button>
+      <button class="next" data-go="s9">Next: your project map →</button>
+    </div>
+  </section>
+
+  <!-- ============ 9 ============ -->
+  <section id="s9" data-title="Your project map">
+    <div class="kicker">Putting it together</div>
+    <h2>Your SeatCraft, explained</h2>
+    <p class="lead">Click each layer to see what lives there and why it exists.</p>
+
+    <div class="layers" id="arch">
+      <button class="layer" data-layer="api">
+        <span class="tag">API</span>
+        <span class="nm">SeatCraft.Api</span>
+        <span class="ds">talks to the internet</span>
+      </button>
+      <button class="layer" data-layer="infra">
+        <span class="tag">INFRA</span>
+        <span class="nm">SeatCraft.Infrastructure</span>
+        <span class="ds">talks to the world</span>
+      </button>
+      <button class="layer" data-layer="app">
+        <span class="tag">APP</span>
+        <span class="nm">SeatCraft.Application</span>
+        <span class="ds">the use cases</span>
+      </button>
+      <button class="layer" data-layer="domain">
+        <span class="tag">DOMAIN</span>
+        <span class="nm">SeatCraft.Domain</span>
+        <span class="ds">the rules + the solver</span>
+      </button>
+    </div>
+    <div class="layerout" id="archout"><span style="color:var(--dim2)">👆 Click a layer above.</span></div>
+
+    <div class="note">
+      <b>Why this order?</b> Dependencies point downward. The API knows about Infrastructure,
+      Infrastructure knows about Application, Application knows about Domain.
+      <strong>Domain knows about nothing.</strong> That's why the solver can be tested in milliseconds
+      without a database, a web server, or a network.
+    </div>
+
+    <h3>The interview story, in six sentences</h3>
+    <div class="card">
+      <p style="margin:0;color:var(--txt);line-height:1.9">
+        "I built an exam seat allocation engine. The core is a constraint solver that assigns
+        thousands of candidates to seats so no two from the same institution sit adjacent —
+        that's graph colouring on a grid, which is NP-hard, so I use DSATUR ordering plus a
+        repair pass that escapes local minima.<br><br>
+        The solver lives in the domain layer with no dependencies, so it's pure and testable —
+        I cover it with unit tests and FsCheck property tests that generate random hall layouts
+        and assert no plan ever double-books a seat.<br><br>
+        Around it, ASP.NET Core exposes a multi-tenant REST API with JWT auth, where the tenant
+        filter is enforced by EF Core query filters rather than application code.<br><br>
+        Allocation runs asynchronously through a background queue with progress polling and
+        idempotency keys, so a large solve never blocks an HTTP request.<br><br>
+        Output is QuestPDF admit cards and attendance sheets, and there's a public seat lookup
+        that requires roll plus date of birth so the roster can't be enumerated.<br><br>
+        I also wrote a Postman collection that runs the whole flow end to end — running it
+        found four real bugs that the unit tests had missed."
+      </p>
+    </div>
+
+    <div class="navrow">
+      <button class="next back" data-go="s8">← Back</button>
+      <button class="next" data-go="s10">Next: cheat sheet →</button>
+    </div>
+  </section>
+
+  <!-- ============ 10 ============ -->
+  <section id="s10" data-title="Interview cheat sheet">
+    <div class="kicker">Before the call</div>
+    <h2>Answers to have ready</h2>
+    <p class="lead">Open each one. If you can say it out loud without reading, you're ready.</p>
+
+    <div class="reveal"><button>What's the difference between C# and .NET? <span class="arrow">▶</span></button>
+      <div class="body">C# is the language — the syntax you write. .NET is the platform that runs it. C# compiles to IL, and the CLR (part of .NET) executes that IL. .NET also supports F# and VB.NET, which compile to the same IL.</div></div>
+
+    <div class="reveal"><button>Value type vs reference type? <span class="arrow">▶</span></button>
+      <div class="body">Value types (int, bool, struct) hold the data directly and live on the stack; copying copies the value. Reference types (class, string, arrays) hold a pointer to heap memory; copying copies the pointer, so both variables see the same object. That's why mutating a shared List affects both references.</div></div>
+
+    <div class="reveal"><button>What does async/await actually do? <span class="arrow">▶</span></button>
+      <div class="body">It lets a thread be released while waiting on I/O. <code>async</code> marks a method as returning a Task; <code>await</code> suspends the method and returns the thread to the pool until the operation completes. This is why an API can handle many concurrent requests without one thread per request.</div></div>
+
+    <div class="reveal"><button>Why never use .Result or .Wait()? <span class="arrow">▶</span></button>
+      <div class="body">They block the calling thread synchronously. In a context with a synchronization context (classic ASP.NET, UI), that causes deadlocks — the thread waits for the task, and the task needs that same thread to finish. Always await instead.</div></div>
+
+    <div class="reveal"><button>Singleton vs Scoped vs Transient? <span class="arrow">▶</span></button>
+      <div class="body">Singleton: one instance for the app's lifetime. Scoped: one per HTTP request (DbContext lives here). Transient: a new one every time it's resolved. You cannot inject a Scoped service into a Singleton — the Singleton outlives the request and would hold a disposed object.</div></div>
+
+    <div class="reveal"><button>IQueryable vs IEnumerable? <span class="arrow">▶</span></button>
+      <div class="body">IQueryable builds an expression tree that EF translates to SQL, so filtering happens in the database. IEnumerable executes in memory — calling ToList() first downloads everything, then filters. The difference is the placement of ToList().</div></div>
+
+    <div class="reveal"><button>What is the N+1 query problem? <span class="arrow">▶</span></button>
+      <div class="body">Looping over N entities and hitting the database once per item, producing N+1 queries instead of one. Fix it by loading related data up front with Include(), or by projecting everything you need in a single Select().</div></div>
+
+    <div class="reveal"><button>What is dependency injection and why use it? <span class="arrow">▶</span></button>
+      <div class="body">A class declares what it needs as constructor parameters instead of creating them itself. The container supplies them. Benefits: you can swap implementations (Redis cache vs in-memory) without touching the class, and you can inject fakes in tests.</div></div>
+
+    <div class="reveal"><button>How do you protect invariants in your domain model? <span class="arrow">▶</span></button>
+      <div class="body">Private setters plus static factory methods that validate. You can't construct an invalid Candidate — Create() throws if the roll is blank. External code can read but not mutate. This is encapsulation enforced by the type system, not by convention.</div></div>
+
+    <div class="reveal"><button>What is middleware and why does order matter? <span class="arrow">▶</span></button>
+      <div class="body">Middleware is a chain of handlers each request passes through. Order matters because each wraps the next: authentication must run before authorization (you can't check permissions before knowing the user), and exception handling goes early so it catches everything downstream.</div></div>
+
+    <div class="reveal"><button>What's the hardest bug you fixed in this project? <span class="arrow">▶</span></button>
+      <div class="body">"A property-based test found that my repair pass got stuck in local minima — for one hall shape it returned 3 violations and stopped. A greedy repair can't escape a local minimum, so I added random 'kick' moves that relocate a conflicting candidate and retry, keeping the best plan found. It now solves that case in milliseconds."</div></div>
+
+    <div class="reveal"><button>Why did you make the solver a separate library? <span class="arrow">▶</span></button>
+      <div class="body">Because it has no dependencies — no EF Core, no HTTP, no clock. That means I can test it in milliseconds, benchmark it in isolation, and it's deterministic for a given seed. If it lived in a controller, none of that would be possible.</div></div>
+
+    <div class="navrow">
+      <button class="next back" data-go="s9">← Back</button>
+      <button class="next" data-go="s11">Test yourself →</button>
+    </div>
+  </section>
+
+  <!-- ============ 11 ============ -->
+  <section id="s11" data-title="Quiz">
+    <div class="kicker">Check yourself</div>
+    <h2>Ten questions</h2>
+    <p class="lead">No pressure. Wrong answers show an explanation.</p>
+
+    <div class="score" id="score"><div class="n">0 / 10</div><div class="l">answered correctly</div></div>
+    <div id="quiz"></div>
+
+    <div class="navrow">
+      <button class="next back" data-go="s10">← Back</button>
+      <button class="next" id="reset">Restart quiz</button>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+/* ---------- nav ---------- */
+const sections = [...document.querySelectorAll('section')];
+const nav = document.getElementById('nav');
+const visited = new Set();
+let current = 0;
+
+sections.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="num">${String(i + 1).padStart(2, '0')}</span><span>${s.dataset.title}</span>`;
+  b.onclick = () => go(i);
+  nav.appendChild(b);
+});
+
+function go(i) {
+  current = i;
+  sections.forEach((s, n) => s.classList.toggle('on', n === i));
+  [...nav.children].forEach((b, n) => b.classList.toggle('on', n === i));
+  visited.add(i);
+  document.getElementById('prog').style.width =
+    ((visited.size / sections.length) * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('[data-go]').forEach(b => {
+  b.onclick = () => {
+    const i = sections.findIndex(s => s.id === b.dataset.go);
+    if (i >= 0) go(i);
+  };
+});
+go(0);
+
+/* ---------- copy buttons ---------- */
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.onclick = () => {
+    const pre = btn.closest('.code').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied';
+      setTimeout(() => btn.textContent = 'copy', 1200);
+    });
+  };
+});
+
+/* ---------- annotated code ---------- */
+const notes = {
+  e1: [
+    '<b>public sealed class</b> — a class anyone can use, that nothing can inherit from. <code>sealed</code> is a performance hint and a design statement: this entity is final.',
+    'Opening brace. C# uses braces to group blocks, like most C-family languages.',
+    '<b>public string Roll { get; private set; }</b> — a property. Anyone can read it; only this class can write it. The <code>= string.Empty</code> guarantees it is never null even before <code>Create()</code> runs.',
+    '',
+    'Same pattern for FullName. Notice there is no public constructor — you cannot do <code>new Candidate()</code> from outside.',
+    '',
+    '<b>public static Candidate Create(...)</b> — the only way to build one. <code>static</code> means it belongs to the class, not to an instance. It takes exactly the data a valid candidate needs.',
+    'Method body opens.',
+    '<b>if (string.IsNullOrWhiteSpace(roll))</b> — validation before construction. Whitespace counts as empty here, unlike a plain <code>== null</code> check.',
+    '<b>throw new DomainException(...)</b> — fail loudly with a message a human can act on. The API middleware later turns this into a 400 response.',
+    '',
+    '<b>return new Candidate { ... }</b> — object initialiser syntax. Creates the object and sets properties in one expression.',
+    'Opening brace of the object initialiser.',
+    'Sets the tenant. This is what makes the row belong to one customer and not another.',
+    '<b>roll.Trim()</b> — strips leading and trailing spaces so " R001 " and "R001" are the same roll.',
+    'Same for the name.',
+    'End of the object initialiser.',
+    'End of Create.',
+    'End of the class.'
+  ],
+  e2: [
+    '<b>async Task&lt;ExamDto&gt;</b> — three things at once. <code>async</code> lets you use await inside. <code>Task&lt;T&gt;</code> is the promise of a T later. <code>ExamDto</code> is what you actually get when it completes.',
+    'Method body opens.',
+    '<b>await _data.Exams.FindAsync(id)</b> — sends the query, releases the thread, resumes here when the row arrives. While waiting, this thread serves other requests.',
+    '',
+    '<b>if (exam is null)</b> — <code>is null</code> is the modern null check. Preferred over <code>== null</code> because it cannot be overloaded by a custom operator.',
+    '<b>throw new NotFoundException(...)</b> — the interpolated string <code>$"..."</code> embeds the id directly. Middleware maps this to a 404.',
+    '',
+    '<b>return _mapper.ToDto(exam)</b> — converts the entity into a DTO. Never return your database entity straight to the client; it leaks internal fields and couples your API to your schema.',
+    'End of method.'
+  ],
+  e3: [
+    '<b>[Route("api/exams")]</b> — the base URL for every action in this class. Square brackets mean an attribute: metadata the framework reads at runtime.',
+    '<b>[Authorize]</b> — no token, no entry. Returns 401 automatically before your code runs.',
+    '<b>ExamsController(ExamService examService)</b> — a primary constructor. The DI container sees this and injects an ExamService. The controller never creates one itself.',
+    'Class body opens.',
+    '<b>[HttpGet("{examId:guid}")]</b> — maps GET /api/exams/{something}. The <code>:guid</code> constraint means a non-Guid returns 404 without even calling your method.',
+    '<b>async Task&lt;IActionResult&gt;</b> — IActionResult is "some HTTP response". It could be 200, 404, 400 — the method decides.',
+    'Method body opens.',
+    '<b>await examService.GetAsync(examId)</b> — the controller does no business logic. It delegates. This is why the service layer exists.',
+    '<b>return OkJson(exam)</b> — 200 with a JSON body. Your base class keeps serialisation options consistent across every endpoint.',
+    'End of action.',
+    'End of controller.'
+  ]
+};
+
+document.querySelectorAll('.code.annot').forEach(block => {
+  const target = document.getElementById(block.dataset.explain);
+  block.querySelectorAll('.ln').forEach(line => {
+    line.onclick = () => {
+      block.querySelectorAll('.ln').forEach(l => l.classList.remove('sel'));
+      line.classList.add('sel');
+      const i = line.dataset.i;
+      const text = notes[block.dataset.explain]?.[i];
+      target.innerHTML = text || '<span class="hint">Blank line — nothing to explain here.</span>';
+    };
+  });
+});
+
+/* ---------- reveals ---------- */
+document.querySelectorAll('.reveal > button').forEach(btn => {
+  btn.onclick = () => btn.parentElement.classList.toggle('open');
+});
+
+/* ---------- architecture diagram ---------- */
+const layers = {
+  api: {
+    title: 'SeatCraft.Api',
+    body: `<b>What it does:</b> the front door. Controllers, middleware, and the composition root (<code>Program.cs</code>).<br><br>
+    <b>Contains:</b> <code>ExamsController</code>, <code>SeatPlansController</code>, <code>PublicController</code>,
+    <code>ExceptionHandlingMiddleware</code>, <code>TenantResolutionMiddleware</code>.<br><br>
+    <b>Rule:</b> controllers are thin. They parse the request, call a service, and shape the response.
+    No business logic lives here — if it did, you could not test it without HTTP.`
+  },
+  infra: {
+    title: 'SeatCraft.Infrastructure',
+    body: `<b>What it does:</b> every implementation of an interface the Application layer declared.<br><br>
+    <b>Contains:</b> <code>SeatCraftDbContext</code> (EF Core), <code>JwtTokenIssuer</code>,
+    <code>RedisDistributedLock</code>, <code>InMemoryPlanCache</code>, the QuestPDF generators, and the background worker.<br><br>
+    <b>Rule:</b> this is the only layer allowed to know about databases, Redis, files, or the clock.
+    Swap SQLite for Postgres and nothing above this line changes.`
+  },
+  app: {
+    title: 'SeatCraft.Application',
+    body: `<b>What it does:</b> the use cases — "start an allocation", "publish a plan", "import a CSV".<br><br>
+    <b>Contains:</b> <code>AllocationService</code>, <code>SeatPlanService</code>, <code>CandidateImportService</code>,
+    plus the interfaces (<code>IPlanCache</code>, <code>IDistributedLock</code>) that Infrastructure implements.<br><br>
+    <b>Rule:</b> it depends only on interfaces, never on concrete infrastructure.
+    That is what lets the tests run against SQLite while production runs Postgres.`
+  },
+  domain: {
+    title: 'SeatCraft.Domain',
+    body: `<b>What it does:</b> the rules of the problem, expressed in code. No framework, no database, no HTTP.<br><br>
+    <b>Contains:</b> <code>Exam</code>, <code>Candidate</code>, <code>SeatPlan</code>,
+    and <b>the solver</b> — <code>SeatGrid</code>, <code>BalancedAllocationStrategy</code>,
+    <code>StrictAllocationStrategy</code>, <code>PlanValidator</code>.<br><br>
+    <b>Rule:</b> it references <em>nothing</em>. Zero NuGet packages. That is why 5,000 candidates
+    can be solved in 80 ms and tested in milliseconds — there is no I/O to wait on.`
+  }
+};
+
+document.querySelectorAll('#arch .layer').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#arch .layer').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const d = layers[btn.dataset.layer];
+    document.getElementById('archout').innerHTML =
+      `<div style="color:var(--cyan);font-weight:600;margin-bottom:8px">${d.title}</div>${d.body}`;
+  };
+});
+
+/* ---------- quiz ---------- */
+const questions = [
+  { q: 'What is the difference between C# and .NET?',
+    o: ['They are the same thing', 'C# is the language; .NET is the platform that runs it', 'C# is for Windows; .NET is for Linux', '.NET is the language; C# is the compiler'],
+    a: 1, why: 'C# is the syntax you write. .NET is the runtime and libraries. C# compiles to IL, which the CLR executes.' },
+
+  { q: 'Which of these is a reference type?',
+    o: ['int', 'bool', 'string', 'double'],
+    a: 2, why: 'string is a class, so it is a reference type. int, bool and double are value types and live on the stack.' },
+
+  { q: 'What does <code>async Task&lt;T&gt;</code> mean on a method?',
+    o: ['It runs on a new thread', 'It returns a T immediately', 'It returns a promise of T that must be awaited', 'It is faster than a normal method'],
+    a: 2, why: 'It returns a Task<T> — a promise. The caller awaits it to get the T. It is not about threads; it is about not blocking one while waiting on I/O.' },
+
+  { q: 'Why should you never use <code>.Result</code> on a Task?',
+    o: ['It is slower', 'It throws an exception', 'It blocks the thread and can deadlock', 'It only works with async void'],
+    a: 2, why: 'It blocks synchronously. In a context with a synchronisation context, the blocked thread is the one the task needs to resume — deadlock.' },
+
+  { q: 'A Scoped service is created…',
+    o: ['Once per application', 'Once per HTTP request', 'Every time it is requested', 'Once per thread'],
+    a: 1, why: 'Scoped means one instance per request. DbContext is scoped, which is why it tracks changes safely for the duration of one request.' },
+
+  { q: 'Which lifetime would you use for a DbContext?',
+    o: ['Singleton', 'Scoped', 'Transient', 'Static'],
+    a: 1, why: 'Scoped. It must be shared within one request (so change tracking works) but never across requests (DbContext is not thread-safe).' },
+
+  { q: 'What is the key difference between IQueryable and IEnumerable?',
+    o: ['IQueryable is faster in all cases', 'IQueryable builds SQL executed in the database; IEnumerable runs in memory', 'IEnumerable supports async', 'There is no difference'],
+    a: 1, why: 'IQueryable defers to the provider, which translates to SQL. Calling ToList() early turns it into IEnumerable and pulls everything into memory first.' },
+
+  { q: 'Can you inject a Scoped service into a Singleton?',
+    o: ['Yes, always', 'No — the Singleton outlives the scope', 'Only if it is registered as Transient too', 'Only in Development'],
+    a: 1, why: 'The Singleton lives for the whole app; the Scoped instance dies at the end of its request. .NET throws at startup if you try.' },
+
+  { q: 'In the middleware pipeline, must authentication come before authorization?',
+    o: ['No, order does not matter', 'Yes — you cannot check permissions before knowing who the user is', 'No, authorization runs first by default', 'Only when using JWT'],
+    a: 1, why: 'Authorization needs an identity. If it ran first, every request would be anonymous and rejected.' },
+
+  { q: 'Why is the solver a separate library with no dependencies?',
+    o: ['To make the solution bigger', 'So it can be tested and benchmarked in isolation, and stays deterministic', 'Because ASP.NET requires it', 'To avoid using NuGet'],
+    a: 1, why: 'No EF Core, no HTTP, no clock means tests run in milliseconds, benchmarks are honest, and the same seed always produces the same plan.' }
+];
+
+let answered = 0, correct = 0;
+const quizEl = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+
+function renderQuiz() {
+  answered = 0; correct = 0;
+  updateScore();
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const div = document.createElement('div');
+    div.className = 'q';
+    div.innerHTML = `<div class="qt">${qi + 1}. ${item.q}</div>`;
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.innerHTML = opt;
+      b.onclick = () => {
+        if (div.dataset.done) return;
+        div.dataset.done = '1';
+        answered++;
+        const opts = div.querySelectorAll('.opt');
+        opts.forEach(o => o.disabled = true);
+        opts[item.a].classList.add('right');
+        if (oi === item.a) { correct++; }
+        else { b.classList.add('wrong'); }
+        div.querySelector('.why').classList.add('show');
+        updateScore();
+      };
+      div.appendChild(b);
+    });
+    const why = document.createElement('div');
+    why.className = 'why';
+    why.innerHTML = `<b>Why:</b> ${item.why}`;
+    div.appendChild(why);
+    quizEl.appendChild(div);
+  });
+}
+
+function updateScore() {
+  scoreEl.innerHTML =
+    `<div class="n">${correct} / ${questions.length}</div>
+     <div class="l">${answered === 0 ? 'answered correctly' : answered + ' answered · ' + correct + ' correct'}</div>`;
+}
+
+document.getElementById('reset').onclick = () => { renderQuiz(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+renderQuiz();
+
+/* ---------- keyboard nav ---------- */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' && current < sections.length - 1) go(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) go(current - 1);
+});
+</script>
+</body>
+</html>
