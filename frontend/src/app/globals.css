@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   SeatCraft design tokens — "solid glass, colour forward"
+   Thick smoky panes with a lit rim, sitting on a dark aurora.
+   ========================================================================== */
+
+@theme {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  --radius-pane: 1.125rem;
+  --radius-ctl: 0.75rem;
+
+  --color-ink: oklch(97.5% 0.012 285);
+  --color-ink-2: oklch(84% 0.022 285);
+  --color-ink-3: oklch(68% 0.028 285);
+
+  --color-violet: oklch(72% 0.19 298);
+  --color-indigo: oklch(67% 0.21 275);
+  --color-cyan: oklch(82% 0.14 205);
+  --color-emerald: oklch(80% 0.17 162);
+  --color-amber: oklch(85% 0.16 82);
+  --color-rose: oklch(73% 0.21 12);
+  --color-blue: oklch(74% 0.16 250);
+  --color-fuchsia: oklch(74% 0.22 330);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+
+  --pane: oklch(44% 0.045 285 / 0.32);
+  --pane-2: oklch(50% 0.05 285 / 0.38);
+  --rim: oklch(100% 0 0 / 0.18);
+  --edge: oklch(100% 0 0 / 0.075);
+  --well: oklch(0% 0 0 / 0.3);
+  --hover: oklch(100% 0 0 / 0.07);
+
+  --shadow-pane:
+    inset 0 1px 0 var(--rim),
+    0 0 0 1px var(--edge),
+    0 24px 48px -34px oklch(0% 0 0 / 0.95);
+  --shadow-ctl:
+    inset 0 1px 0 oklch(100% 0 0 / 0.16),
+    0 0 0 1px var(--edge),
+    0 1px 2px oklch(0% 0 0 / 0.35);
+  --blur-pane: blur(26px) saturate(180%);
+  --blur-ctl: blur(14px) saturate(160%);
+}
+
+* {
+  border-color: var(--edge);
+}
+
+html {
+  /* Base colour lives on <html> so the aurora pseudo-element on <body>
+     is not painted over by body's own background. */
+  background: oklch(16.5% 0.035 288);
+}
+
+body {
+  min-height: 100dvh;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background: transparent;
+}
+
+/* The aurora sits behind every page. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -30% -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(46rem 34rem at 10% 4%, oklch(62% 0.28 296 / 0.55), transparent 62%),
+    radial-gradient(42rem 30rem at 90% 0%, oklch(74% 0.19 205 / 0.42), transparent 60%),
+    radial-gradient(38rem 28rem at 78% 98%, oklch(66% 0.26 348 / 0.38), transparent 62%),
+    radial-gradient(30rem 22rem at 22% 94%, oklch(84% 0.18 82 / 0.18), transparent 64%),
+    radial-gradient(34rem 24rem at 50% 50%, oklch(58% 0.22 268 / 0.22), transparent 66%);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -1.5%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-2%, 1.5%, 0) scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Glass primitives — plain CSS so every component shares one definition
+   ========================================================================== */
+
+@utility glass-pane {
+  background: var(--pane);
+  box-shadow: var(--shadow-pane);
+  -webkit-backdrop-filter: var(--blur-pane);
+  backdrop-filter: var(--blur-pane);
+}
+
+@utility glass-ctl {
+  background: oklch(100% 0 0 / 0.07);
+  box-shadow: var(--shadow-ctl);
+  -webkit-backdrop-filter: var(--blur-ctl);
+  backdrop-filter: var(--blur-ctl);
+}
+
+@utility glass-well {
+  background: var(--well);
+  box-shadow:
+    inset 0 2px 10px oklch(0% 0 0 / 0.45),
+    inset 0 0 0 1px oklch(100% 0 0 / 0.06);
+}
+
+@utility glass-rim {
+  box-shadow:
+    inset 0 1px 0 var(--rim),
+    0 0 0 1px var(--edge);
+}
+
+@utility text-gradient {
+  background: linear-gradient(
+    102deg,
+    oklch(98% 0.01 285) 8%,
+    oklch(84% 0.13 300) 38%,
+    oklch(86% 0.11 205) 66%,
+    oklch(86% 0.13 162)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* Scrollbars that match the glass. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(100% 0 0 / 0.16) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: oklch(100% 0 0 / 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(100% 0 0 / 0.24);
+  background-clip: content-box;
+}
+
+/* A subtle grain keeps large glass panes from looking flat. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+}
