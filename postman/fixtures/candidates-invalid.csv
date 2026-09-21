@@ -1,0 +1,7 @@
+roll,name,institutionCode,subjectGroup,dateOfBirth
+R9001,Valid Candidate,C1,Science,2000-05-01
+R9002,Unknown College,ZZ,Science,2000-05-02
+,Missing Roll,C1,Science,2000-05-03
+R9004,Another Valid,C2,Commerce,2000-05-04
+R9005,Bad Date,C1,Science,not-a-date
+R0001,Duplicate Roll,C1,Science,2000-05-06

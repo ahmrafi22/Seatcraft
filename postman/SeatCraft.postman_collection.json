@@ -1,0 +1,1993 @@
+﻿{
+  "info": {
+    "_postman_id": "a7c1e9f2-3b64-4d58-9c1a-2e7b5f0d9c11",
+    "name": "SeatCraft API",
+    "description": "Exam seat allocation and admit-card engine.\n\n## Run order\nFolders are numbered. Run top to bottom (Collection Runner or `newman run`). Later folders depend on ids captured by earlier ones.\n\n## Prerequisites\n- API running: `cd backend && dotnet run --project src/SeatCraft.Api`\n- Environment **SeatCraft - Local** selected\n- Run from the `postman/` folder so the CSV fixture paths resolve\n\n## Re-runnable\n`Register Tenant` accepts **409** when the tenant already exists, and the following `Login` obtains a token either way. The collection can be run repeatedly against the same database.\n\n## Captured variables\nWritten to the **environment**: `token`, `examId`, `institutionId`, `hallId`, `hallBId`, `candidateId`, `runId`, `greedyRunId`, `planId`, `candidateA`, `candidateB`, `seededExamId`, `seededRunId`.\n\n## Note on assertions\nThe solver guarantees no *same-institution adjacency* violations. Roll-order is advisory and may be reported without blocking publish, so tests assert on blocking violations only.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "00 - Health",
+      "description": "Sanity checks. Run first to confirm the API is up.",
+      "item": [
+        {
+          "name": "Liveness",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('reports Healthy', () => pm.expect(pm.response.text()).to.include('Healthy'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+            "description": "Unauthenticated liveness probe."
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness (database)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/health/ready", "host": ["{{baseUrl}}"], "path": ["health", "ready"] },
+            "description": "Readiness probe that also checks the database connection."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Auth",
+      "description": "Register a tenant and obtain a JWT. Every later folder needs the token captured here.",
+      "item": [
+        {
+          "name": "Register Tenant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('registered or already exists', () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));",
+                  "",
+                  "if (pm.response.code === 409) {",
+                  "  console.log('Tenant already exists - the Login request below will obtain the token.');",
+                  "  return;",
+                  "}",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('returns an access token', () => pm.expect(body.accessToken).to.be.a('string').and.not.empty);",
+                  "pm.test('registers an Admin', () => pm.expect(body.user.role).to.eql('Admin'));",
+                  "",
+                  "pm.environment.set('token', body.accessToken);",
+                  "pm.environment.set('tenantId', body.user.tenantId);",
+                  "pm.environment.set('userId', body.user.id);",
+                  "",
+                  "console.log('Registered tenant ' + body.user.tenantId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantName\": \"Demo Academy\",\n  \"tenantSlug\": \"{{tenantSlug}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Demo Admin\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "description": "Creates a tenant plus its first Admin user.\n\nReturns **409 Conflict** if the slug or email already exists - that is expected on a second run."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('returns an access token', () => pm.expect(body.accessToken).to.be.a('string').and.not.empty);",
+                  "",
+                  "pm.environment.set('token', body.accessToken);",
+                  "pm.environment.set('tenantId', body.user.tenantId);",
+                  "",
+                  "console.log('Authenticated as ' + body.user.email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "Exchanges credentials for a JWT. This is the request that makes the collection re-runnable."
+          },
+          "response": []
+        },
+        {
+          "name": "Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('has a tenant claim', () => pm.expect(body.tenantId).to.be.a('string').and.not.empty);",
+                  "pm.test('role is Admin', () => pm.expect(body.role).to.eql('Admin'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] },
+            "description": "Echoes the identity resolved from the JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - wrong password (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('does not leak whether the email exists', () => pm.expect(pm.response.json().detail).to.eql('Invalid email or password.'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"definitely-the-wrong-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "Negative case: the error is identical to an unknown email."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Exams",
+      "description": "Create and configure the exam that owns every other resource.",
+      "item": [
+        {
+          "name": "Create Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('starts in Draft', () => pm.expect(body.status).to.eql('Draft'));",
+                  "",
+                  "pm.environment.set('examId', body.id);",
+                  "",
+                  "console.log('Exam ' + body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Demo Admission Test 2026\",\n  \"description\": \"Seeded from Postman to exercise the allocation pipeline\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/exams", "host": ["{{baseUrl}}"], "path": ["api", "exams"] }
+          },
+          "response": []
+        },
+        {
+          "name": "List Exams",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const items = pm.response.json();",
+                  "",
+                  "pm.test('returns an array', () => pm.expect(items).to.be.an('array'));",
+                  "pm.test('includes the exam we just created', () => {",
+                  "  pm.expect(items.some(e => e.id === pm.environment.get('examId'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/exams", "host": ["{{baseUrl}}"], "path": ["api", "exams"] },
+            "description": "Only returns exams belonging to the caller's tenant."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('matches the captured exam', () => pm.expect(pm.response.json().id).to.eql(pm.environment.get('examId')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["api", "exams", "{{examId}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('title updated', () => pm.expect(pm.response.json().title).to.eql('Demo Admission Test 2026 (Updated)'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Demo Admission Test 2026 (Updated)\",\n  \"description\": \"Renamed via Postman\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["api", "exams", "{{examId}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Constraints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('moves to Configured', () => pm.expect(body.status).to.eql('Configured'));",
+                  "pm.test('adjacency rule enabled', () => pm.expect(body.constraints.preventSameInstitutionAdjacent).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preventSameInstitutionAdjacent\": true,\n  \"keepSubjectGroupContiguous\": true,\n  \"maintainRollOrder\": true,\n  \"allowHallSkipping\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/constraints",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "constraints"]
+            },
+            "description": "Sets the rules the solver must honour. Turning off `preventSameInstitutionAdjacent` makes allocation trivial - useful for contrast."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Institutions",
+      "description": "Institutions drive the adjacency constraint. The CSV fixture references C1-C6, so all six must exist before the import in folder 05.",
+      "item": [
+        {
+          "name": "Create Institution C1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created or already exists', () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));",
+                  "",
+                  "if (pm.response.code === 409) {",
+                  "  console.log('C1 already exists - fine, the fixture only needs the code to resolve.');",
+                  "  return;",
+                  "}",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('code is upper-cased', () => pm.expect(body.code).to.eql('C1'));",
+                  "",
+                  "pm.environment.set('institutionId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo College 01\",\n  \"code\": \"C1\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/institutions", "host": ["{{baseUrl}}"], "path": ["api", "institutions"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Institutions C2-C6 (looped)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const next = pm.environment.get('nextInstitutionCode') || 'C2';",
+                  "",
+                  "pm.variables.set('institutionCode', next);",
+                  "pm.variables.set('institutionName', 'Demo College ' + next);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const code = pm.variables.get('institutionCode');",
+                  "",
+                  "pm.test('created or already exists: ' + code, () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('lastInstitutionId', pm.response.json().id);",
+                  "}",
+                  "",
+                  "const number = parseInt(code.replace('C', ''), 10);",
+                  "",
+                  "if (number < 6) {",
+                  "  pm.environment.set('nextInstitutionCode', 'C' + (number + 1));",
+                  "  pm.execution.setNextRequest('Create Institutions C2-C6 (looped)');",
+                  "} else {",
+                  "  pm.environment.set('nextInstitutionCode', '');",
+                  "  console.log('Institutions C1-C6 ready');",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{institutionName}}\",\n  \"code\": \"{{institutionCode}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/institutions", "host": ["{{baseUrl}}"], "path": ["api", "institutions"] },
+            "description": "Self-repeating request. The pre-request script picks the next code (C2 to C6) and the test script calls `pm.execution.setNextRequest` until all five exist.\n\nThis is the canonical Postman looping pattern and works in both Postman and Newman."
+          },
+          "response": []
+        },
+        {
+          "name": "List Institutions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const items = pm.response.json();",
+                  "",
+                  "pm.test('all six fixture institutions exist', () => {",
+                  "  const codes = items.map(i => i.code);",
+                  "  ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'].forEach(code => pm.expect(codes).to.include(code));",
+                  "});",
+                  "",
+                  "// Keep C1 for the manual candidate in folder 05.",
+                  "const c1 = items.find(i => i.code === 'C1');",
+                  "if (c1) pm.environment.set('institutionId', c1.id);",
+                  "",
+                  "console.log('Institutions available: ' + items.map(i => i.code).join(', '));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/institutions", "host": ["{{baseUrl}}"], "path": ["api", "institutions"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Empty Institution (expect 204)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Create a throwaway institution so this request deletes something real",
+                  "// without disturbing the C1-C6 codes the CSV fixture depends on.",
+                  "const baseUrl = pm.variables.get('baseUrl');",
+                  "const token = pm.environment.get('token');",
+                  "const code = 'TMP' + Date.now().toString().slice(-6);",
+                  "",
+                  "pm.sendRequest({",
+                  "  url: baseUrl + '/api/institutions',",
+                  "  method: 'POST',",
+                  "  header: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },",
+                  "  body: { mode: 'raw', raw: JSON.stringify({ name: 'Throwaway College', code: code }) }",
+                  "}, function (err, res) {",
+                  "  if (!err && res.code === 200) {",
+                  "    pm.environment.set('throwawayInstitutionId', res.json().id);",
+                  "  } else {",
+                  "    console.warn('Could not create throwaway institution: ' + (err ? err.message : res.code));",
+                  "  }",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/{{throwawayInstitutionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "institutions", "{{throwawayInstitutionId}}"]
+            },
+            "description": "Creates a temporary institution in the pre-request script, then deletes it. Exercises the delete endpoint without disturbing C1-C6.\n\nThe guarded case (409 when candidates exist) is tested in folder 05."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Halls",
+      "description": "Halls define the seat grid. Blocked seats are removed from the solver's slot graph.",
+      "item": [
+        {
+          "name": "Create Hall A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('capacity is rows x columns', () => pm.expect(body.capacity).to.eql(64));",
+                  "",
+                  "pm.environment.set('hallId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hall A\",\n  \"rows\": 8,\n  \"columns\": 8\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Hall B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('capacity is rows x columns', () => pm.expect(body.capacity).to.eql(48));",
+                  "",
+                  "pm.environment.set('hallBId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hall B\",\n  \"rows\": 6,\n  \"columns\": 8\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls"]
+            },
+            "description": "A second hall so the solver has a choice of where to place candidates."
+          },
+          "response": []
+        },
+        {
+          "name": "List Halls",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('two halls exist', () => pm.expect(pm.response.json().length).to.eql(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Hall Layout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('rows changed to 9', () => pm.expect(body.rows).to.eql(9));",
+                  "pm.test('capacity override honoured', () => pm.expect(body.usableCapacity).to.eql(70));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rows\": 9,\n  \"columns\": 8,\n  \"capacityOverride\": 70\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls/{{hallId}}/layout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls", "{{hallId}}", "layout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block Seat (0,0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('blocked seat recorded', () => pm.expect(body.blockedSeats.length).to.eql(1));",
+                  "pm.test('usable capacity drops to 69', () => pm.expect(body.usableCapacity).to.eql(69));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls/{{hallId}}/seats/0/0/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls", "{{hallId}}", "seats", "0", "0", "block"]
+            },
+            "description": "Marks a broken desk. The solver never places anyone here."
+          },
+          "response": []
+        },
+        {
+          "name": "Unblock Seat (0,0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('block cleared', () => pm.expect(pm.response.json().blockedSeats.length).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls/{{hallId}}/seats/0/0/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls", "{{hallId}}", "seats", "0", "0", "block"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block Seat - outside layout (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('explains the problem', () => pm.expect(pm.response.json().detail).to.include('outside the hall layout'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/halls/{{hallId}}/seats/99/99/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "halls", "{{hallId}}", "seats", "99", "99", "block"]
+            },
+            "description": "Negative case for seat bounds."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Candidates",
+      "description": "Roster management: manual create, CSV import with per-row errors, paging, and the delete guard.",
+      "item": [
+        {
+          "name": "Create Candidate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('has the requested roll', () => pm.expect(body.roll).to.eql('R0000'));",
+                  "pm.test('resolves the institution name', () => pm.expect(body.institutionName).to.be.a('string').and.not.empty);",
+                  "",
+                  "pm.environment.set('candidateId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roll\": \"R0000\",\n  \"fullName\": \"Manual Entry\",\n  \"subjectGroup\": \"Science\",\n  \"institutionId\": \"{{institutionId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates"]
+            },
+            "description": "Requires `institutionId` from folder 03."
+          },
+          "response": []
+        },
+        {
+          "name": "Import Candidates (CSV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('imported all 60 rows', () => pm.expect(body.imported).to.eql(60));",
+                  "pm.test('no row errors', () => pm.expect(body.errors).to.be.an('array').that.is.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "fixtures/candidates.csv",
+                  "description": "60 candidates across 6 institutions (C1-C6), each with a date of birth."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates", "import"]
+            },
+            "description": "CSV header: `roll,name,institutionCode,subjectGroup,dateOfBirth`.\n\nRun from the `postman/` folder so the relative fixture path resolves."
+          },
+          "response": []
+        },
+        {
+          "name": "Import - bad rows (partial success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('keeps the 2 valid rows', () => pm.expect(body.imported).to.eql(2));",
+                  "pm.test('reports 4 bad rows', () => pm.expect(body.errors.length).to.eql(4));",
+                  "pm.test('each error carries a line number', () => {",
+                  "  body.errors.forEach(e => pm.expect(e.line).to.be.a('number'));",
+                  "});",
+                  "pm.test('unknown institution is explained', () => {",
+                  "  pm.expect(body.errors.some(e => e.message.includes('Unknown institution'))).to.eql(true);",
+                  "});",
+                  "pm.test('duplicate roll is explained', () => {",
+                  "  pm.expect(body.errors.some(e => e.message.includes('already exists'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "fixtures/candidates-invalid.csv",
+                  "description": "Deliberately broken: unknown institution, missing roll, bad date, duplicate roll."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates", "import"]
+            },
+            "description": "Shows row-level validation: valid rows are imported, bad rows come back with line numbers. The fixture has 2 good rows and 4 bad ones."
+          },
+          "response": []
+        },
+        {
+          "name": "List Candidates (paged)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('returns a page', () => pm.expect(body.items).to.be.an('array').that.is.not.empty);",
+                  "pm.test('page size honoured', () => pm.expect(body.items.length).to.be.at.most(5));",
+                  "pm.test('reports the total', () => pm.expect(body.totalCount).to.be.greaterThan(60));",
+                  "",
+                  "console.log('Total candidates: ' + body.totalCount);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates?page=1&pageSize=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "5" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Candidates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const items = pm.response.json().items;",
+                  "",
+                  "pm.test('every hit matches the term', () => {",
+                  "  pm.expect(items.length).to.be.greaterThan(0);",
+                  "  items.forEach(c => {",
+                  "    pm.expect((c.roll + ' ' + c.fullName).toLowerCase()).to.include('rahman');",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates?search=Rahman&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates"],
+              "query": [
+                { "key": "search", "value": "Rahman" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            },
+            "description": "Search matches roll or name."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Institution With Candidates (expect 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('explains the guard', () => pm.expect(pm.response.json().detail).to.include('still has candidates'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/{{institutionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "institutions", "{{institutionId}}"]
+            },
+            "description": "C1 now has candidates from the CSV import, so deletion is refused. This is the guard that keeps the roster consistent."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Candidate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/candidates/{{candidateId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "candidates", "{{candidateId}}"]
+            },
+            "description": "Removes the manually created R0000 so the plan holds exactly the 62 imported candidates."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Allocation",
+      "description": "The core flow: start an async run, poll until terminal, then work with the resulting plan.",
+      "item": [
+        {
+          "name": "Start Allocation Run (Strict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('run accepted', () => pm.expect(body.status).to.be.oneOf(['Queued', 'Running', 'Completed']));",
+                  "",
+                  "pm.environment.set('runId', body.id);",
+                  "",
+                  "console.log('Run ' + body.id + ' (' + body.strategy + ', seed ' + body.seed + ')');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "postman-demo-run-001", "description": "Optional. Repeated calls with the same key return the same run instead of starting another." }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strategy\": \"Strict\",\n  \"seed\": 42\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs"]
+            },
+            "description": "Strategies:\n- `Greedy` - naive first fit, may leave adjacency conflicts\n- `Balanced` - DSATUR ordering, usually clean\n- `Strict` - repair pass, aims for zero violations (default choice)\n\nReturns **409 Conflict** if another run is already active for this exam."
+          },
+          "response": []
+        },
+        {
+          "name": "Poll Run (looped until terminal)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const terminal = ['Completed', 'Failed', 'Cancelled'].includes(body.status);",
+                  "",
+                  "if (!terminal) {",
+                  "  const attempts = parseInt(pm.environment.get('runPollAttempts') || '0', 10) + 1;",
+                  "  pm.environment.set('runPollAttempts', String(attempts));",
+                  "",
+                  "  if (attempts > 30) {",
+                  "    pm.test('run finished within 30 polls', () => pm.expect.fail('Still ' + body.status + ' after 30 polls'));",
+                  "  } else {",
+                  "    pm.execution.setNextRequest('Poll Run (looped until terminal)');",
+                  "  }",
+                  "",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.environment.set('runPollAttempts', '0');",
+                  "",
+                  "pm.test('run reached Completed', () => pm.expect(body.status).to.eql('Completed'));",
+                  "pm.test('assigned every candidate', () => pm.expect(body.candidateCount).to.be.greaterThan(0));",
+                  "pm.test('used at least one hall', () => pm.expect(body.hallsUsed).to.be.greaterThan(0));",
+                  "",
+                  "pm.environment.set('planId', body.resultSeatPlanId);",
+                  "",
+                  "console.log('Plan ' + body.resultSeatPlanId + ' - ' + body.candidateCount + ' candidates in ' + body.hallsUsed + ' hall(s), ' + body.durationMs + ' ms, ' + body.bestViolationCount + ' violation(s)');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs/{{runId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs", "{{runId}}"]
+            },
+            "description": "Polls until the run leaves Queued/Running, re-invoking itself with `pm.execution.setNextRequest`. Caps at 30 attempts so a stuck run fails instead of looping forever."
+          },
+          "response": []
+        },
+        {
+          "name": "List Runs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('returns history', () => pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Run - Greedy (comparison)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.environment.set('greedyRunId', body.id);",
+                  "",
+                  "console.log('Greedy run ' + body.id + ' started');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "postman-demo-greedy-001" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strategy\": \"Greedy\",\n  \"seed\": 42\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs"]
+            },
+            "description": "Same data, weaker strategy. With many institutions relative to seats Greedy often looks fine; the gap appears when a few institutions dominate the roster. Use the demo seed in folder 12 to make the contrast stark."
+          },
+          "response": []
+        },
+        {
+          "name": "Poll Greedy Run (looped)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const terminal = ['Completed', 'Failed', 'Cancelled'].includes(body.status);",
+                  "",
+                  "if (!terminal) {",
+                  "  const attempts = parseInt(pm.environment.get('greedyPollAttempts') || '0', 10) + 1;",
+                  "  pm.environment.set('greedyPollAttempts', String(attempts));",
+                  "",
+                  "  if (attempts <= 30) {",
+                  "    pm.execution.setNextRequest('Poll Greedy Run (looped)');",
+                  "  }",
+                  "",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.environment.set('greedyPollAttempts', '0');",
+                  "",
+                  "if (body.status === 'Completed') {",
+                  "  console.log('Greedy violations: ' + body.bestViolationCount);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs/{{greedyRunId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs", "{{greedyRunId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Run",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('cancel accepted or run already finished', () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/allocation-runs/{{greedyRunId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "allocation-runs", "{{greedyRunId}}"]
+            },
+            "description": "Cancelling an already-completed run returns **409** - expected, and why this test accepts both codes."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Seat Plans",
+      "description": "Inspect the generated plan, make manual overrides, publish, and verify immutability.",
+      "item": [
+        {
+          "name": "Get Seat Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('has assignments', () => pm.expect(body.assignments.length).to.be.greaterThan(0));",
+                  "",
+                  "const blocking = body.violations.filter(v => v.kind !== 'RollOrderBroken');",
+                  "",
+                  "pm.test('no blocking violations', () => pm.expect(blocking).to.be.an('array').that.is.empty);",
+                  "",
+                  "if (body.violations.length > blocking.length) {",
+                  "  console.log('Note: roll-order advisory reported - non-blocking by design.');",
+                  "}",
+                  "",
+                  "pm.environment.set('candidateA', body.assignments[0].candidateId);",
+                  "pm.environment.set('candidateB', body.assignments[1].candidateId);",
+                  "",
+                  "console.log('First seat: ' + body.assignments[0].roll + ' -> ' + body.assignments[0].hallName + ' ' + body.assignments[0].seatLabel);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}"]
+            },
+            "description": "Full plan with every assignment plus a re-validated violation list.\n\nOnly *blocking* violations (same-institution adjacency) prevent publishing. Roll-order is reported as advisory."
+          },
+          "response": []
+        },
+        {
+          "name": "Revalidate Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const violations = pm.response.json();",
+                  "",
+                  "pm.test('returns a violation array', () => pm.expect(violations).to.be.an('array'));",
+                  "pm.test('no adjacency violations', () => {",
+                  "  pm.expect(violations.some(v => v.kind === 'SameInstitutionAdjacent')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/violations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "violations"]
+            },
+            "description": "Runs the independent validator over the stored plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Swap Two Seats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('returns an override result', () => pm.expect(body).to.have.property('applied'));",
+                  "pm.test('reports a violation count', () => pm.expect(body.violationCount).to.be.a('number'));",
+                  "",
+                  "if (body.applied === false) {",
+                  "  console.log('Swap blocked: would introduce ' + body.violationCount + ' violation(s). The forced variant below shows the override path.');",
+                  "} else {",
+                  "  console.log('Swap applied with ' + body.violationCount + ' violation(s).');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstCandidateId\": \"{{candidateA}}\",\n  \"secondCandidateId\": \"{{candidateB}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/swap",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "swap"]
+            },
+            "description": "The system re-validates immediately. If the swap breaks a rule it returns `applied: false` with the specific violations instead of saving a broken plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Swap - forced with reason",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('override result shape', () => pm.expect(body).to.have.property('applied'));",
+                  "",
+                  "console.log(body.applied ? 'Forced override applied and audited.' : 'No violations existed, so no force was needed.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstCandidateId\": \"{{candidateA}}\",\n  \"secondCandidateId\": \"{{candidateB}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/swap?force=true&reason=Accessibility%20request%20from%20candidate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "swap"],
+              "query": [
+                { "key": "force", "value": "true" },
+                { "key": "reason", "value": "Accessibility request from candidate" }
+              ]
+            },
+            "description": "`force=true` plus a reason lets an operator save a plan that breaks a rule. The override is written to the audit trail with the reason attached."
+          },
+          "response": []
+        },
+        {
+          "name": "Move Candidate to Free Seat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK or 409 if seat taken', () => pm.expect(pm.response.code).to.be.oneOf([200, 409]));",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('returns an override result', () => pm.expect(pm.response.json()).to.have.property('applied'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": \"{{candidateA}}\",\n  \"hallId\": \"{{hallBId}}\",\n  \"row\": 0,\n  \"column\": 0,\n  \"reason\": \"Accessibility request\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/move",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "move"]
+            },
+            "description": "Moves a candidate to a specific seat. Returns **409** if that seat is occupied - swap instead. Either outcome is valid here depending on the generated plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Move - outside layout (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": \"{{candidateA}}\",\n  \"hallId\": \"{{hallId}}\",\n  \"row\": 50,\n  \"column\": 50,\n  \"reason\": \"Out of bounds\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/move",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "move"]
+            },
+            "description": "Seat coordinates outside the hall layout are rejected before anything is written."
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Plan (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('status is Published', () => pm.expect(body.status).to.eql('Published'));",
+                  "pm.test('has a publish timestamp', () => pm.expect(body.publishedAt).to.not.be.null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "publish"]
+            },
+            "description": "Publishing makes seats visible to candidates via the public lookup. Any previously published plan is superseded.\n\nReturns **409** if blocking violations remain."
+          },
+          "response": []
+        },
+        {
+          "name": "Swap After Publish - immutable (expect 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('explains immutability', () => pm.expect(pm.response.json().detail).to.include('immutable'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstCandidateId\": \"{{candidateA}}\",\n  \"secondCandidateId\": \"{{candidateB}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/swap",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "swap"]
+            },
+            "description": "A published plan is frozen, so candidates never see a plan that changed under them."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - Documents",
+      "description": "Admit cards and attendance sheets as ZIP archives of PDFs. Use Send and Download in Postman to save them.",
+      "item": [
+        {
+          "name": "Admit Cards (ZIP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('is a zip', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('zip'));",
+                  "pm.test('is not empty', () => pm.expect(pm.response.responseSize).to.be.greaterThan(1000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/documents/admit-cards",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "documents", "admit-cards"]
+            },
+            "description": "One PDF per candidate, zipped."
+          },
+          "response": []
+        },
+        {
+          "name": "Attendance Sheets (ZIP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('is a zip', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('zip'));",
+                  "pm.test('is not empty', () => pm.expect(pm.response.responseSize).to.be.greaterThan(500));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}/documents/attendance-sheets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}", "documents", "attendance-sheets"]
+            },
+            "description": "One roll-ordered attendance sheet per hall, zipped."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - Public Lookup",
+      "description": "Unauthenticated seat lookup. Requires roll + date of birth so the roster cannot be enumerated.",
+      "item": [
+        {
+          "name": "Seat Lookup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('returns a hall', () => pm.expect(body.hallName).to.be.a('string').and.not.empty);",
+                  "pm.test('returns a seat label', () => pm.expect(body.seatLabel).to.match(/^R\\d+-C\\d+$/));",
+                  "pm.test('returns the requested roll', () => pm.expect(body.roll).to.eql(pm.environment.get('roll')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": {
+              "raw": "{{baseUrl}}/api/public/{{tenantSlug}}/seat-lookup?roll={{roll}}&dateOfBirth={{dateOfBirth}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "public", "{{tenantSlug}}", "seat-lookup"],
+              "query": [
+                { "key": "roll", "value": "{{roll}}" },
+                { "key": "dateOfBirth", "value": "{{dateOfBirth}}" }
+              ]
+            },
+            "description": "`roll=R0001`, `dateOfBirth=2000-01-02` matches the first row of `fixtures/candidates.csv`. The tenant is in the path because anonymous callers have no JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Seat Lookup - wrong DOB (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('message is identical to unknown roll', () => pm.expect(pm.response.json().detail).to.include('No seat was found'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": {
+              "raw": "{{baseUrl}}/api/public/{{tenantSlug}}/seat-lookup?roll={{roll}}&dateOfBirth=1999-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "public", "{{tenantSlug}}", "seat-lookup"],
+              "query": [
+                { "key": "roll", "value": "{{roll}}" },
+                { "key": "dateOfBirth", "value": "1999-12-31" }
+              ]
+            },
+            "description": "Date of birth is the second factor - a wrong value is indistinguishable from an unknown roll."
+          },
+          "response": []
+        },
+        {
+          "name": "Seat Lookup - unknown tenant (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('404 Not Found', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": {
+              "raw": "{{baseUrl}}/api/public/does-not-exist/seat-lookup?roll={{roll}}&dateOfBirth={{dateOfBirth}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "public", "does-not-exist", "seat-lookup"],
+              "query": [
+                { "key": "roll", "value": "{{roll}}" },
+                { "key": "dateOfBirth", "value": "{{dateOfBirth}}" }
+              ]
+            },
+            "description": "A tenant slug that does not exist must not leak whether the roll exists elsewhere."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 - Security",
+      "description": "Authentication and tenant-isolation checks.",
+      "item": [
+        {
+          "name": "No Token (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/api/exams", "host": ["{{baseUrl}}"], "path": ["api", "exams"] },
+            "description": "Protected routes require a bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "Unknown Exam Id (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('is a problem-details payload', () => pm.expect(pm.response.json()).to.have.property('status'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Returns 404 rather than 403 so exam ids cannot be probed across tenants."
+          },
+          "response": []
+        },
+        {
+          "name": "Cross-Tenant Read Blocked",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Register a second tenant, then have it try to read the first tenant's exam.",
+                  "const baseUrl = pm.variables.get('baseUrl');",
+                  "const stamp = Date.now().toString().slice(-6);",
+                  "const foreignSlug = 'intruder' + stamp;",
+                  "const foreignEmail = 'intruder' + stamp + '@test.local';",
+                  "",
+                  "pm.sendRequest({",
+                  "  url: baseUrl + '/api/auth/register',",
+                  "  method: 'POST',",
+                  "  header: { 'Content-Type': 'application/json' },",
+                  "  body: {",
+                  "    mode: 'raw',",
+                  "    raw: JSON.stringify({",
+                  "      tenantName: 'Intruder ' + stamp,",
+                  "      tenantSlug: foreignSlug,",
+                  "      email: foreignEmail,",
+                  "      password: 'Passw0rd!123',",
+                  "      displayName: 'Intruder Admin'",
+                  "    })",
+                  "  }",
+                  "}, function (err, res) {",
+                  "  if (!err && res.code === 200) {",
+                  "    pm.variables.set('foreignToken', res.json().accessToken);",
+                  "    console.log('Second tenant registered: ' + foreignSlug);",
+                  "  } else {",
+                  "    console.warn('Could not register second tenant: ' + (err ? err.message : res.code));",
+                  "  }",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('no existence leak', () => pm.expect(pm.response.json().status).to.eql(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{foreignToken}}" }],
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/api/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["api", "exams", "{{examId}}"] },
+            "description": "Registers a second tenant in the pre-request script, then requests the first tenant's exam with that tenant's token.\n\nExpected: **404**, not 403 — the API does not confirm that the id exists."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 - Cleanup (optional)",
+      "description": "Teardown. Skip this folder when you want to inspect results afterwards.",
+      "item": [
+        {
+          "name": "Delete Seat Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('deleted or protected', () => pm.expect(pm.response.code).to.be.oneOf([204, 409]));",
+                  "",
+                  "if (pm.response.code === 409) {",
+                  "  console.log('Plan is published, so deletion is refused - expected.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/seat-plans/{{planId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "seat-plans", "{{planId}}"]
+            },
+            "description": "Published plans cannot be deleted (409)."
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('status is Archived', () => pm.expect(pm.response.json().status).to.eql('Archived'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/exams/{{examId}}/archive", "host": ["{{baseUrl}}"], "path": ["api", "exams", "{{examId}}", "archive"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/exams/{{examId}}", "host": ["{{baseUrl}}"], "path": ["api", "exams", "{{examId}}"] },
+            "description": "Admin only. Removes the exam along with its halls, candidates and plans."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 - Demo Seed (dev only)",
+      "description": "One-call exam setup for demos and benchmarks. Disabled outside Development/Testing.",
+      "item": [
+        {
+          "name": "Seed Demo Exam (500 candidates)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('created the requested volume', () => pm.expect(body.candidates).to.eql(500));",
+                  "",
+                  "pm.environment.set('seededExamId', body.examId);",
+                  "",
+                  "console.log('Seeded exam ' + body.examId + ' with ' + body.candidates + ' candidates across ' + body.institutions + ' institutions');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/seed-demo?candidates=500&institutions=20&halls=12",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dev", "seed-demo"],
+              "query": [
+                { "key": "candidates", "value": "500" },
+                { "key": "institutions", "value": "20" },
+                { "key": "halls", "value": "12" }
+              ]
+            },
+            "description": "Admin only, and only in Development/Testing. Creates a complete exam in one request."
+          },
+          "response": []
+        },
+        {
+          "name": "Start Run on Seeded Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('seededRunId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strategy\": \"Strict\",\n  \"seed\": 7\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{seededExamId}}/allocation-runs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{seededExamId}}", "allocation-runs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Poll Seeded Run (looped)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const terminal = ['Completed', 'Failed', 'Cancelled'].includes(body.status);",
+                  "",
+                  "if (!terminal) {",
+                  "  const attempts = parseInt(pm.environment.get('seededPollAttempts') || '0', 10) + 1;",
+                  "  pm.environment.set('seededPollAttempts', String(attempts));",
+                  "",
+                  "  if (attempts <= 30) {",
+                  "    pm.execution.setNextRequest('Poll Seeded Run (looped)');",
+                  "  }",
+                  "",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.environment.set('seededPollAttempts', '0');",
+                  "",
+                  "pm.test('completed', () => pm.expect(body.status).to.eql('Completed'));",
+                  "pm.test('zero adjacency violations at 500 candidates', () => pm.expect(body.bestViolationCount).to.eql(0));",
+                  "",
+                  "console.log('Seeded run: ' + body.candidateCount + ' candidates, ' + body.hallsUsed + ' halls, ' + body.durationMs + ' ms');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{seededExamId}}/allocation-runs/{{seededRunId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{seededExamId}}", "allocation-runs", "{{seededRunId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "token", "value": "" },
+    { "key": "examId", "value": "" },
+    { "key": "planId", "value": "" }
+  ]
+}
