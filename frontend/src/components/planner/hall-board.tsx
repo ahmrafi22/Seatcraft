@@ -1,0 +1,176 @@
+﻿"use client";
+
+import { useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
+
+import { cn } from "@/lib/cn";
+import { hueFor } from "@/lib/colors";
+import { seatLabel } from "@/lib/format";
+import type { Hall, SeatAssignment } from "@/lib/api/types";
+
+export interface BoardSeat {
+  row: number;
+  column: number;
+  blocked: boolean;
+  assignment: SeatAssignment | null;
+}
+
+/** Flattens a hall into a row-major grid of seats. */
+export function buildSeats(hall: Hall, assignments: SeatAssignment[]): BoardSeat[] {
+  const blocked = new Set(hall.blockedSeats.map((seat) => `${seat.row}:${seat.column}`));
+  const byCell = new Map<string, SeatAssignment>();
+
+  for (const assignment of assignments) {
+    if (assignment.hallId !== hall.id) continue;
+    byCell.set(`${assignment.row}:${assignment.column}`, assignment);
+  }
+
+  const seats: BoardSeat[] = [];
+
+  for (let row = 0; row < hall.rows; row += 1) {
+    for (let column = 0; column < hall.columns; column += 1) {
+      seats.push({
+        row,
+        column,
+        blocked: blocked.has(`${row}:${column}`),
+        assignment: byCell.get(`${row}:${column}`) ?? null
+      });
+    }
+  }
+
+  return seats;
+}
+
+export function HallBoard({
+  hall,
+  assignments,
+  flagged,
+  selectedCandidateId,
+  onSelect,
+  onSwap,
+  onMove,
+  disabled
+}: {
+  hall: Hall;
+  assignments: SeatAssignment[];
+  flagged: Set<string>;
+  selectedCandidateId: string | null;
+  onSelect: (candidateId: string | null) => void;
+  onSwap: (first: SeatAssignment, second: SeatAssignment) => void;
+  onMove: (candidate: SeatAssignment, row: number, column: number) => void;
+  disabled?: boolean;
+}) {
+  const seats = useMemo(() => buildSeats(hall, assignments), [hall, assignments]);
+  const [dragFrom, setDragFrom] = useState<SeatAssignment | null>(null);
+  const [hoverCell, setHoverCell] = useState<string | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={boardRef}
+      className="glass-well -mx-4 overflow-x-auto rounded-none px-4 py-4 sm:mx-0 sm:rounded-[var(--radius-pane)] sm:p-4"
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${hall.columns}, minmax(var(--seat-min), 1fr))`,
+        gap: 6,
+        // Shrink seats on narrow screens so a 10-wide hall fits without scrolling.
+        ["--seat-min" as string]: "clamp(22px, 6.4vw, 34px)"
+      }}
+    >
+      {seats.map((seat) => {
+        const cellKey = `${seat.row}:${seat.column}`;
+        const assignment = seat.assignment;
+        const isDragging = Boolean(assignment && dragFrom && dragFrom.candidateId === assignment.candidateId);
+        const isHover = hoverCell === cellKey;
+        const isFlagged = Boolean(assignment && flagged.has(assignment.candidateId));
+        const isSelected = Boolean(assignment && selectedCandidateId === assignment.candidateId);
+        const hue = assignment ? hueFor(assignment.institutionId) : 0;
+
+        if (seat.blocked) {
+          return (
+            <div
+              key={cellKey}
+              title={`Blocked Â· ${seatLabel(seat.row, seat.column)}`}
+              className="aspect-square cursor-not-allowed rounded-[7px] bg-[repeating-linear-gradient(45deg,oklch(100%_0_0/.03),oklch(100%_0_0/.03)_5px,oklch(100%_0_0/.07)_5px,oklch(100%_0_0/.07)_10px)] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.05)]"
+            />
+          );
+        }
+
+        if (!assignment) {
+          return (
+            <div
+              key={cellKey}
+              title={`Empty Â· ${seatLabel(seat.row, seat.column)}`}
+              onDragOver={(event) => {
+                if (!dragFrom || disabled) return;
+                event.preventDefault();
+                setHoverCell(cellKey);
+              }}
+              onDragLeave={() => setHoverCell(null)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setHoverCell(null);
+                if (!dragFrom || disabled) return;
+                onMove(dragFrom, seat.row, seat.column);
+                setDragFrom(null);
+              }}
+              className={cn(
+                "aspect-square rounded-[7px] bg-white/[0.025] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.06)] transition-shadow",
+                isHover && "shadow-[0_0_0_2px_var(--color-cyan),0_0_18px_oklch(82%_.14_205/.45)]"
+              )}
+            />
+          );
+        }
+
+        return (
+          <motion.button
+            key={cellKey}
+            type="button"
+            layout
+            draggable={!disabled}
+            disabled={disabled}
+            title={`${assignment.roll} Â· ${assignment.fullName}\n${assignment.institutionName}\nSeat ${seatLabel(seat.row, seat.column)}`}
+            onDragStart={() => setDragFrom(assignment)}
+            onDragEnd={() => {
+              setDragFrom(null);
+              setHoverCell(null);
+            }}
+            onDragOver={(event) => {
+              if (!dragFrom || disabled) return;
+              event.preventDefault();
+              setHoverCell(cellKey);
+            }}
+            onDragLeave={() => setHoverCell(null)}
+            onDrop={(event) => {
+              event.preventDefault();
+              setHoverCell(null);
+              if (!dragFrom || disabled || dragFrom.candidateId === assignment.candidateId) return;
+              onSwap(dragFrom, assignment);
+              setDragFrom(null);
+            }}
+            onClick={() => onSelect(isSelected ? null : assignment.candidateId)}
+            className={cn(
+              "relative grid aspect-square cursor-grab place-items-center rounded-[7px]",
+              "font-mono text-[10.5px] font-semibold",
+              "transition-[transform,box-shadow,opacity] duration-150 ease-[var(--ease-out-soft)]",
+              "hover:z-10 hover:-translate-y-0.5 disabled:cursor-default",
+              isDragging && "opacity-30",
+              isHover && "shadow-[0_0_0_2px_var(--color-cyan),0_0_20px_oklch(82%_.14_205/.5)]",
+              isSelected && "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent"
+            )}
+            style={{
+              background: `color-mix(in oklch, oklch(72% .18 ${hue}) 22%, transparent)`,
+              color: `color-mix(in oklch, oklch(72% .18 ${hue}) 45%, white)`,
+              boxShadow: isFlagged
+                ? "inset 0 1px 0 oklch(100% 0 0 / .25), 0 0 0 1.5px oklch(72% .20 22), 0 0 16px oklch(72% .20 22 / .55)"
+                : `inset 0 1px 0 oklch(100% 0 0 / .20), 0 0 0 1px color-mix(in oklch, oklch(72% .18 ${hue}) 45%, transparent), 0 4px 12px -6px color-mix(in oklch, oklch(72% .18 ${hue}) 70%, transparent)`
+            }}
+          >
+            {assignment.roll.slice(-3)}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
