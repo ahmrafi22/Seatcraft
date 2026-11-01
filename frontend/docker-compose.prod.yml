@@ -1,0 +1,43 @@
+name: seatcraft-web
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Public origin shown in the UI hint; server-side calls use the value below.
+        SEATCRAFT_API_ORIGIN: https://seatcraft.duckdns.org
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      NODE_ENV: production
+      # Same docker network as the API stack, so this never leaves the host.
+      SEATCRAFT_API_ORIGIN: http://api:8080
+      # Empty means "same origin": nginx proxies /api to the API. Set it only when
+      # the browser must reach a different host for downloads.
+      SEATCRAFT_PUBLIC_API_ORIGIN: ""
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - seatcraft
+
+networks:
+  seatcraft:
+    external: true
+    name: seatcraft_default

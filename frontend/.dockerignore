@@ -1,0 +1,7 @@
+node_modules
+.next
+scripts
+README.md
+AGENTS.md
+npm-debug.log*
+.env*
