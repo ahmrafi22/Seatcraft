@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Emits .next/standalone so the Docker image ships only the files it needs.
-  output: "standalone",
+  // Vercel builds its own output, so the option is only set off-platform.
+  output: process.env.VERCEL ? undefined : "standalone",
   // Kept off: the badge collided with the topbar chips and the mobile nav.
   // Compile and runtime errors still surface in the terminal and error overlay.
   devIndicators: false,
