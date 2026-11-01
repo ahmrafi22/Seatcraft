@@ -17,6 +17,11 @@ RUN dotnet publish src/SeatCraft.Api/SeatCraft.Api.csproj -c Release -o /app/pub
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
+# QuestPDF resolves fonts through fontconfig; the slim base image does not ship it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libfontconfig1 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN adduser --disabled-password --gecos "" --uid 10001 appuser
 USER appuser
 

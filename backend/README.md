@@ -110,6 +110,21 @@ cd backend
 docker compose up --build
 ```
 
+### Production compose
+
+`docker-compose.prod.yml` runs Postgres and the API only: the database has no published
+port, both services restart on failure, and memory is capped for a 2 GB host.
+
+```bash
+cd backend
+cp .env.example .env                # set POSTGRES_PASSWORD and JWT_SIGNING_KEY
+docker compose -f docker-compose.prod.yml up -d --build
+curl http://localhost:8080/health
+```
+
+Migrations run at startup, so the first boot creates the schema. Register a tenant with
+`POST /api/auth/register`, then use the returned token.
+
 ## API surface
 
 | Method | Route | Purpose |
