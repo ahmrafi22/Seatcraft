@@ -58,28 +58,6 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   return payload as T;
 }
 
-/** Blob download (admit cards, attendance sheets). */
-export async function apiBlob(path: string): Promise<{ blob: Blob; filename: string }> {
-  const token = await getAccessToken();
-
-  const response = await fetch(`${ORIGIN}/api${path}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    cache: "no-store"
-  });
-
-  if (!response.ok) {
-    throw new ApiError(response.status, `Download failed with status ${response.status}.`);
-  }
-
-  const disposition = response.headers.get("content-disposition") ?? "";
-  const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
-
-  return {
-    blob: await response.blob(),
-    filename: match?.[1] ?? "download.zip"
-  };
-}
-
 function safeJson(text: string): unknown {
   try {
     return JSON.parse(text);

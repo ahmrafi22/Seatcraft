@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { api, apiBlob } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { requireAdmin, requireSession } from "@/lib/auth-guard";
 import type { AllocationRun, Exam, SeatPlanDetail, SeatPlan, SeedResult, Strategy } from "@/lib/api/types";
@@ -181,18 +181,25 @@ export async function fetchPlanAction(examId: string, planId: string): Promise<S
   return "ok" in result ? null : result;
 }
 
+/**
+ * Documents are streamed by the API, not buffered here: the backend returns a signed
+ * ten-minute URL and the browser fetches it directly. Keeps a 20 MB+ archive out of
+ * the web tier entirely.
+ */
 export async function downloadDocumentAction(
   examId: string,
   planId: string,
   kind: "admit-cards" | "attendance-sheets"
-): Promise<{ ok: boolean; base64?: string; filename?: string; message?: string }> {
+): Promise<{ ok: boolean; url?: string; message?: string }> {
   await requireSession();
 
   try {
-    const { blob, filename } = await apiBlob(`/exams/${examId}/seat-plans/${planId}/documents/${kind}`);
-    const buffer = Buffer.from(await blob.arrayBuffer());
+    const link = await api<{ url: string; expiresAt: string }>(
+      `/exams/${examId}/seat-plans/${planId}/documents/${kind}/link`,
+      { method: "POST" }
+    );
 
-    return { ok: true, base64: buffer.toString("base64"), filename };
+    return { ok: true, url: `${process.env.SEATCRAFT_PUBLIC_API_ORIGIN ?? ""}${link.url}` };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not build the documents." };
   }

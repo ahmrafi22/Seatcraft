@@ -31,21 +31,14 @@ export function DocumentDownloads({
 
     const result = await downloadDocumentAction(examId, planId, kind);
 
-    if (!result.ok || !result.base64) {
+    if (!result.ok || !result.url) {
       setBusy(null);
       setError(result.message ?? "Could not build the documents.");
       return;
     }
 
-    const bytes = Uint8Array.from(atob(result.base64), (char) => char.charCodeAt(0));
-    const url = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
-    const anchor = document.createElement("a");
-
-    anchor.href = url;
-    anchor.download = result.filename ?? "seatcraft.zip";
-    anchor.click();
-
-    URL.revokeObjectURL(url);
+    // The API streams the zip itself, so the browser downloads straight from it.
+    window.location.assign(result.url);
     setBusy(null);
   }
 
