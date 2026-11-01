@@ -7,6 +7,7 @@ using SeatCraft.Application.Abstractions;
 using SeatCraft.Application.Allocation;
 using SeatCraft.Application.Auth;
 using SeatCraft.Application.Candidates;
+using SeatCraft.Application.Documents;
 using SeatCraft.Application.Exams;
 using SeatCraft.Application.Halls;
 using SeatCraft.Application.Institutions;
@@ -76,6 +77,7 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+        services.AddSingleton<IDownloadLinkIssuer, HmacDownloadLinkIssuer>();
 
         return services;
     }
@@ -92,6 +94,7 @@ public static class DependencyInjection
         services.AddScoped<AllocationRunner>();
         services.AddScoped<SeatPlanService>();
         services.AddScoped<DemoSeedService>();
+        services.AddScoped<DocumentArchiveService>();
 
         return services;
     }

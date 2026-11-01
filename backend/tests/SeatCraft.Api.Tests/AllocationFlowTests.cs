@@ -199,6 +199,41 @@ public sealed class AllocationFlowTests(SeatCraftApiFactory factory) : IClassFix
     }
 
     [Fact]
+    public async Task SignedDownloadLink_ServesArchiveWithoutABearer()
+    {
+        var (client, exam) = await SeedExamAsync(factory, "flow-download");
+        var run = await client.StartRunAsync(exam.Id);
+        var finished = await client.WaitForRunAsync(exam.Id, run.Id);
+        var planId = finished.ResultSeatPlanId!.Value;
+
+        await client.PublishAsync(exam.Id, planId);
+
+        var linkResponse = await client.Http.PostAsync(
+            $"/api/exams/{exam.Id}/seat-plans/{planId}/documents/admit-cards/link",
+            null);
+
+        Assert.Equal(HttpStatusCode.OK, linkResponse.StatusCode);
+
+        var link = await linkResponse.Content.ReadFromJsonAsync<DownloadLinkDto>();
+        Assert.NotNull(link);
+
+        var download = await factory.CreateClient().GetAsync(link!.Url);
+
+        Assert.Equal(HttpStatusCode.OK, download.StatusCode);
+        Assert.Equal("application/zip", download.Content.Headers.ContentType?.MediaType);
+
+        var bytes = await download.Content.ReadAsByteArrayAsync();
+        Assert.Equal("PK", System.Text.Encoding.ASCII.GetString(bytes, 0, 2));
+    }
+
+    [Fact]
+    public async Task SignedDownloadLink_RejectsForgedToken()
+    {
+        var forged = await factory.CreateClient().GetAsync("/api/public/documents/forged-token");
+        Assert.Equal(HttpStatusCode.NotFound, forged.StatusCode);
+    }
+
+    [Fact]
     public async Task SeatLookup_IsNotPublished_UntilPlanIsPublished()
     {
         var (client, exam) = await SeedExamAsync(factory, "flow-unpublished");
@@ -211,4 +246,6 @@ public sealed class AllocationFlowTests(SeatCraftApiFactory factory) : IClassFix
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    private sealed record DownloadLinkDto(string Url, DateTimeOffset ExpiresAt);
 }
