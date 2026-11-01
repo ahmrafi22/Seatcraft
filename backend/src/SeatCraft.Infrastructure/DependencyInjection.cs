@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,16 +39,22 @@ public static class DependencyInjection
         var providerName = configuration["Database:Provider"] ?? "Sqlite";
         var connectionString = configuration.GetConnectionString("Default")
             ?? "Data Source=seatcraft.db";
+        var isPostgres = providerName.StartsWith("Postgres", StringComparison.OrdinalIgnoreCase);
 
         services.AddScoped<TenantContext>();
 
         services.AddDbContext<SeatCraftDbContext>((serviceProvider, options) =>
         {
-            if (string.Equals(providerName, "Postgres", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(providerName, "PostgreSQL", StringComparison.OrdinalIgnoreCase))
+            if (isPostgres)
             {
                 options.UseNpgsql(connectionString, npgsql =>
                     npgsql.EnableRetryOnFailure(maxRetryCount: 3));
+
+                // Migrations are generated against SQLite, so the snapshot keeps SQLite
+                // annotations and can never match a Postgres model. The migration
+                // operations themselves are provider-agnostic, so the warning is noise.
+                options.ConfigureWarnings(warnings =>
+                    warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
             }
             else
             {
