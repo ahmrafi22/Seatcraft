@@ -15,23 +15,23 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "allocation_runs",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExamId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Strategy = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    Seed = table.Column<int>(type: "INTEGER", nullable: false),
-                    IdempotencyKey = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Status = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    ProgressPercent = table.Column<int>(type: "INTEGER", nullable: false),
-                    CurrentPhase = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
-                    BestViolationCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    FailureReason = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
-                    ResultSeatPlanId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DurationMs = table.Column<long>(type: "INTEGER", nullable: false),
-                    CandidateCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    HallsUsed = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ExamId = table.Column<Guid>(nullable: false),
+                    Strategy = table.Column<string>(maxLength: 32, nullable: false),
+                    Seed = table.Column<int>(nullable: false),
+                    IdempotencyKey = table.Column<string>(maxLength: 200, nullable: false),
+                    Status = table.Column<string>(maxLength: 32, nullable: false),
+                    ProgressPercent = table.Column<int>(nullable: false),
+                    CurrentPhase = table.Column<string>(maxLength: 200, nullable: true),
+                    BestViolationCount = table.Column<int>(nullable: false),
+                    FailureReason = table.Column<string>(maxLength: 1000, nullable: true),
+                    ResultSeatPlanId = table.Column<Guid>(nullable: true),
+                    DurationMs = table.Column<long>(nullable: false),
+                    CandidateCount = table.Column<int>(nullable: false),
+                    HallsUsed = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,16 +42,16 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "audit_entries",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExamId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ActorUserId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    Action = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Detail = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: false),
-                    IsForced = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Reason = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ExamId = table.Column<Guid>(nullable: false),
+                    ActorUserId = table.Column<Guid>(nullable: true),
+                    Action = table.Column<string>(maxLength: 100, nullable: false),
+                    Detail = table.Column<string>(maxLength: 2000, nullable: false),
+                    IsForced = table.Column<bool>(nullable: false),
+                    Reason = table.Column<string>(maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,18 +62,18 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "candidates",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExamId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    InstitutionId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Roll = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    FullName = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
-                    SubjectGroup = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    DateOfBirth = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    PhotoUrl = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
-                    IsSeatLocked = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ExamId = table.Column<Guid>(nullable: false),
+                    InstitutionId = table.Column<Guid>(nullable: false),
+                    Roll = table.Column<string>(maxLength: 50, nullable: false),
+                    FullName = table.Column<string>(maxLength: 300, nullable: false),
+                    SubjectGroup = table.Column<string>(maxLength: 100, nullable: false),
+                    DateOfBirth = table.Column<DateOnly>(nullable: true),
+                    PhotoUrl = table.Column<string>(maxLength: 1000, nullable: true),
+                    IsSeatLocked = table.Column<bool>(nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,18 +84,18 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "exams",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
-                    Status = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    prevent_same_institution_adjacent = table.Column<bool>(type: "INTEGER", nullable: false),
-                    keep_subject_group_contiguous = table.Column<bool>(type: "INTEGER", nullable: false),
-                    maintain_roll_order = table.Column<bool>(type: "INTEGER", nullable: false),
-                    allow_hall_skipping = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ActiveSeatPlanId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    Title = table.Column<string>(maxLength: 300, nullable: false),
+                    Description = table.Column<string>(maxLength: 2000, nullable: true),
+                    Status = table.Column<string>(maxLength: 32, nullable: false),
+                    prevent_same_institution_adjacent = table.Column<bool>(nullable: false),
+                    keep_subject_group_contiguous = table.Column<bool>(nullable: false),
+                    maintain_roll_order = table.Column<bool>(nullable: false),
+                    allow_hall_skipping = table.Column<bool>(nullable: false),
+                    ActiveSeatPlanId = table.Column<Guid>(nullable: true),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -106,16 +106,16 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "halls",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExamId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    rows = table.Column<int>(type: "INTEGER", nullable: false),
-                    columns = table.Column<int>(type: "INTEGER", nullable: false),
-                    CapacityOverride = table.Column<int>(type: "INTEGER", nullable: true),
-                    blocked_seats = table.Column<string>(type: "TEXT", maxLength: 20000, nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ExamId = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(maxLength: 200, nullable: false),
+                    rows = table.Column<int>(nullable: false),
+                    columns = table.Column<int>(nullable: false),
+                    CapacityOverride = table.Column<int>(nullable: true),
+                    blocked_seats = table.Column<string>(maxLength: 20000, nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -126,13 +126,13 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "institutions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    CandidateCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(maxLength: 300, nullable: false),
+                    Code = table.Column<string>(maxLength: 50, nullable: false),
+                    CandidateCount = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,15 +143,15 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "seat_plans",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExamId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AllocationRunId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    ViolationCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    PublishedAt = table.Column<long>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ExamId = table.Column<Guid>(nullable: false),
+                    AllocationRunId = table.Column<Guid>(nullable: false),
+                    Status = table.Column<string>(maxLength: 32, nullable: false),
+                    ViolationCount = table.Column<int>(nullable: false),
+                    PublishedAt = table.Column<long>(nullable: true),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,11 +162,11 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "tenants",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Slug = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(maxLength: 200, nullable: false),
+                    Slug = table.Column<string>(maxLength: 100, nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,15 +177,15 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 512, nullable: false),
-                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Role = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
-                    TenantId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    Email = table.Column<string>(maxLength: 256, nullable: false),
+                    PasswordHash = table.Column<string>(maxLength: 512, nullable: false),
+                    DisplayName = table.Column<string>(maxLength: 200, nullable: false),
+                    Role = table.Column<string>(maxLength: 32, nullable: false),
+                    IsActive = table.Column<bool>(nullable: false),
+                    CreatedAt = table.Column<long>(nullable: false),
+                    UpdatedAt = table.Column<long>(nullable: false),
+                    TenantId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -196,12 +196,12 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 name: "seat_assignments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    seat_plan_id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    candidate_id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    hall_id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    row = table.Column<int>(type: "INTEGER", nullable: false),
-                    column = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    seat_plan_id = table.Column<Guid>(nullable: false),
+                    candidate_id = table.Column<Guid>(nullable: false),
+                    hall_id = table.Column<Guid>(nullable: false),
+                    row = table.Column<int>(nullable: false),
+                    column = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
