@@ -42,3 +42,19 @@ cd ../frontend && docker compose -f docker-compose.prod.yml up -d --build
 - `SEATCRAFT_PUBLIC_API_ORIGIN` stays empty: nginx serves `/api` on the same origin, so document
   links stay cookie-free and are streamed straight from the API.
 - Do not publish the Postgres port; only nginx and `$API_PORT` are exposed.
+
+## Vercel (alternative frontend host)
+
+Root Directory `frontend`, framework Next.js, no build override. `next.config.ts` skips
+`output: "standalone"` when it detects Vercel.
+
+| Variable | Value |
+| --- | --- |
+| `SEATCRAFT_API_ORIGIN` | `https://seatcraft.duckdns.org` |
+| `SEATCRAFT_PUBLIC_API_ORIGIN` | `https://seatcraft.duckdns.org` |
+| `SEATCRAFT_DEMO_LOGIN` | `1` (optional — enables the one-click demo button) |
+
+The API must be reachable over HTTPS from Vercel's functions, so keep the nginx site in place.
+Downloads are unaffected: the browser follows the signed URL straight to the API, so the
+24 MB archive never passes through a serverless function.
+
