@@ -8,9 +8,9 @@ type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "text-white bg-[linear-gradient(140deg,oklch(60%_.13_196),oklch(64%_.13_222)_58%,oklch(68%_.16_166))] " +
-    "shadow-[inset_0_1px_0_oklch(100%_0_0/.45),inset_0_-1px_0_oklch(0%_0_0/.25),0_0_0_1px_oklch(100%_0_0/.12),0_10px_26px_-12px_oklch(62%_.15_205/.95)] " +
-    "hover:brightness-110",
+    "text-[oklch(16%_0_0)] bg-[linear-gradient(140deg,oklch(99%_0_0),oklch(90%_0_0)_58%,oklch(80%_0_0))] " +
+    "shadow-[inset_0_1px_0_oklch(100%_0_0/.7),inset_0_-1px_0_oklch(0%_0_0/.12),0_0_0_1px_oklch(100%_0_0/.2),0_10px_26px_-14px_oklch(0%_0_0/.9)] " +
+    "hover:brightness-105",
   default: "glass-ctl text-ink hover:bg-white/[0.12]",
   ghost: "text-ink-2 hover:bg-white/[0.07] hover:text-ink",
   danger:

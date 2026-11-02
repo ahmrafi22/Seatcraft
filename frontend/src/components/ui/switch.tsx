@@ -34,7 +34,7 @@ export function Switch({
         "disabled:cursor-not-allowed disabled:opacity-40",
         track,
         checked
-          ? "bg-[linear-gradient(100deg,oklch(62%_.13_196),oklch(68%_.16_166))] shadow-[inset_0_1px_0_oklch(100%_0_0/.35),0_0_14px_-2px_oklch(64%_.15_200/.8)]"
+          ? "bg-[linear-gradient(100deg,oklch(96%_0_0),oklch(78%_0_0))] shadow-[inset_0_1px_0_oklch(100%_0_0/.35),0_0_14px_-2px_oklch(100%_0_0/.35)]"
           : "bg-white/[0.10]"
       )}
     >

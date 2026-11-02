@@ -1,34 +1,34 @@
 /**
- * Institutions get a colour from their code so the same college is always the
- * same hue across the dashboard, the roster and the hall board.
- * Teal → sky → emerald, with amber and warm reds kept for contrast.
- * No violet or pink: nothing in the 270–345 band.
+ * Institutions get a lightness step from a fixed ash ramp, so the same college
+ * always reads as the same tile across the dashboard, the roster and the hall
+ * board. Hue carries no meaning here: the palette is monochrome, and the steps
+ * are far enough apart to stay distinguishable side by side.
  */
-const HUES = [192, 232, 162, 205, 186, 250, 175, 218, 200, 226, 182, 212];
+const LIGHTNESS = [88, 74, 62, 94, 68, 82, 56, 90, 78, 64, 86, 70];
 
-export function hueFor(seed: string): number {
+export function stepFor(seed: string): number {
   let hash = 0;
 
   for (let i = 0; i < seed.length; i += 1) {
     hash = (hash * 31 + seed.charCodeAt(i)) % 100_000;
   }
 
-  return HUES[hash % HUES.length] ?? 192;
+  return LIGHTNESS[hash % LIGHTNESS.length] ?? 80;
 }
 
-export function institutionColor(seed: string, lightness = 72, chroma = 0.18): string {
-  return `oklch(${lightness}% ${chroma} ${hueFor(seed)})`;
+export function institutionColor(seed: string, lightness?: number): string {
+  return `oklch(${lightness ?? stepFor(seed)}% 0 0)`;
 }
 
 /** Soft seat fill: readable number on a tinted glass tile. */
 export function seatFill(seed: string): string {
-  return `color-mix(in oklch, oklch(80% .17 ${hueFor(seed)}) 30%, transparent)`;
+  return `oklch(${stepFor(seed)}% 0 0 / 0.26)`;
 }
 
 export function seatRim(seed: string): string {
-  return `color-mix(in oklch, oklch(82% .17 ${hueFor(seed)}) 58%, transparent)`;
+  return `oklch(${stepFor(seed)}% 0 0 / 0.55)`;
 }
 
 export function seatInk(seed: string): string {
-  return `color-mix(in oklch, oklch(88% .13 ${hueFor(seed)}) 70%, white)`;
+  return `oklch(${Math.min(98, stepFor(seed) + 12)}% 0 0)`;
 }

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MetricBar } from "@/components/ui/progress";
 import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
 import { Select } from "@/components/ui/field";
-import { institutionColor } from "@/lib/colors";
+import { institutionColor, stepFor } from "@/lib/colors";
 import { percent, seatLabel } from "@/lib/format";
 import { swapSeatsAction, publishPlanAction, moveCandidateAction } from "@/app/actions/exam";
 import type { Exam, Hall, SeatAssignment, SeatPlanDetail } from "@/lib/api/types";
@@ -125,9 +125,9 @@ export function PlannerShell({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
-        <SummaryTile label="Assigned" value={assigned} suffix={`/ ${exam.candidateCount}`} foot={`${percent(assigned, exam.candidateCount)}% placed`} accent="var(--color-sky)" />
-        <SummaryTile label="Usable seats" value={usable} foot={`${Math.max(0, usable - assigned)} spare`} accent="var(--color-sky)" />
-        <SummaryTile label="Violations" value={plan.violations.length} foot={`${blocking.length} blocking`} accent={blocking.length === 0 ? "var(--color-emerald)" : "var(--color-danger)"} />
+        <SummaryTile label="Assigned" value={assigned} suffix={`/ ${exam.candidateCount}`} foot={`${percent(assigned, exam.candidateCount)}% placed`} accent="var(--color-accent)" />
+        <SummaryTile label="Usable seats" value={usable} foot={`${Math.max(0, usable - assigned)} spare`} accent="var(--color-accent-2)" />
+        <SummaryTile label="Violations" value={plan.violations.length} foot={`${blocking.length} blocking`} accent={blocking.length === 0 ? "var(--color-ok)" : "var(--color-danger)"} />
         <div className="glass-pane flex flex-col justify-center rounded-[var(--radius-pane)] px-[18px] py-[17px]">
           <div className="label-mono">Plan status</div>
           <div className="mt-2.5">
@@ -198,7 +198,7 @@ export function PlannerShell({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-x-4.5 gap-y-2.5 text-[12.5px] text-ink-2">
-              <LegendSwatch style={{ background: "var(--color-teal)" }} label="Seat taken" />
+              <LegendSwatch style={{ background: "oklch(78% 0 0)" }} label="Seat taken" />
               <LegendSwatch style={{ background: "oklch(100% 0 0 / .08)" }} label="Empty" />
               <LegendSwatch
                 style={{
@@ -282,8 +282,8 @@ export function PlannerShell({
                     <span
                       className="grid size-9 shrink-0 place-items-center rounded-lg font-mono text-[12px] font-semibold"
                       style={{
-                        background: `color-mix(in oklch, ${institutionColor(selectedAssignment.institutionId)} 26%, transparent)`,
-                        color: `color-mix(in oklch, ${institutionColor(selectedAssignment.institutionId)} 45%, white)`
+                        background: `oklch(${stepFor(selectedAssignment.institutionId)}% 0 0 / 0.26)`,
+                        color: `oklch(${Math.min(98, stepFor(selectedAssignment.institutionId) + 12)}% 0 0)`
                       }}
                     >
                       {selectedAssignment.roll.slice(-2)}

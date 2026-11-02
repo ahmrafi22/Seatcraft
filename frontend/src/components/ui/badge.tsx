@@ -7,10 +7,10 @@ export type BadgeKind = "neutral" | "primary" | "success" | "warning" | "danger"
 const KINDS: Record<BadgeKind, string> = {
   neutral: "bg-white/[0.07] text-ink-2",
   primary:
-    "bg-[oklch(75%_.145_192/.16)] text-[oklch(90%_.08_195)] shadow-[inset_0_0_0_1px_oklch(75%_.145_192/.36)]",
+    "bg-[oklch(100%_0_0/.14)] text-[oklch(97%_0_0)] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.28)]",
   success:
-    "bg-[oklch(80%_.17_160/.14)] text-emerald shadow-[inset_0_0_0_1px_oklch(80%_.17_160/.32)]",
-  warning: "bg-[oklch(85%_.16_82/.14)] text-amber shadow-[inset_0_0_0_1px_oklch(85%_.16_82/.32)]",
+    "bg-[oklch(100%_0_0/.10)] text-[oklch(94%_0_0)] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.22)]",
+  warning: "bg-[oklch(100%_0_0/.06)] text-ink-2 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.16)]",
   danger: "bg-[oklch(69%_.20_27/.16)] text-[oklch(84%_.13_28)] shadow-[inset_0_0_0_1px_oklch(69%_.20_27/.4)]"
 };
 

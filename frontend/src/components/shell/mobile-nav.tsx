@@ -17,7 +17,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-white/10 bg-[oklch(16%_.025_210/.9)] px-1.5 py-1.5 shadow-[0_18px_40px_-18px_oklch(0%_0_0/.9)] backdrop-blur-2xl lg:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-white/10 bg-[oklch(14%_0_0/.9)] px-1.5 py-1.5 shadow-[0_18px_40px_-18px_oklch(0%_0_0/.9)] backdrop-blur-2xl lg:hidden">
       {NAV.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -42,8 +42,8 @@ export function MobileNav() {
 export function MobileBrand() {
   return (
     <Link href="/" className="flex items-center gap-2 lg:hidden">
-      <span className="grid size-7 place-items-center rounded-lg bg-[linear-gradient(140deg,oklch(64%_.14_192),oklch(78%_.15_165))]">
-        <LuArmchair className="size-3.5 text-white" />
+      <span className="grid size-7 place-items-center rounded-lg bg-[linear-gradient(140deg,oklch(96%_0_0),oklch(66%_0_0))]">
+        <LuArmchair className="size-3.5 text-[oklch(16%_0_0)]" />
       </span>
       <span className="text-[14px] font-semibold tracking-[-0.02em]">SeatCraft</span>
     </Link>

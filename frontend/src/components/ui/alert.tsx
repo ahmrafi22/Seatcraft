@@ -5,9 +5,9 @@ import { cn } from "@/lib/cn";
 type Tone = "info" | "success" | "warning" | "danger";
 
 const TONES: Record<Tone, string> = {
-  info: "bg-[oklch(75%_.145_192/.12)] text-[oklch(90%_.07_195)] shadow-[inset_0_0_0_1px_oklch(75%_.145_192/.32)]",
-  success: "bg-[oklch(80%_.17_160/.10)] text-[oklch(88%_.11_162)] shadow-[inset_0_0_0_1px_oklch(80%_.17_160/.3)]",
-  warning: "bg-[oklch(85%_.16_82/.10)] text-[oklch(92%_.10_85)] shadow-[inset_0_0_0_1px_oklch(85%_.16_82/.3)]",
+  info: "bg-[oklch(100%_0_0/.08)] text-ink-2 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.16)]",
+  success: "bg-[oklch(100%_0_0/.07)] text-[oklch(92%_0_0)] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.18)]",
+  warning: "bg-[oklch(100%_0_0/.05)] text-ink-2 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.14)]",
   danger: "bg-[oklch(69%_.20_27/.14)] text-[oklch(88%_.10_30)] shadow-[inset_0_0_0_1px_oklch(69%_.20_27/.36)]"
 };
 

@@ -1,15 +1,15 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-export function Progress({ value, accent = "var(--color-teal)", className }: { value: number; accent?: string; className?: string }) {
+export function Progress({ value, accent = "var(--color-accent)", className }: { value: number; accent?: string; className?: string }) {
   const width = Math.max(0, Math.min(100, value));
 
   return (
     <div className={cn("h-[5px] overflow-hidden rounded-full bg-white/[0.08]", className)}>
       <div
         className="h-full rounded-full transition-[width] duration-300 ease-[var(--ease-out-soft)]"
-        style={{ width: `${width}%`, background: accent, boxShadow: `0 0 10px ${accent}` } as CSSProperties}
+        style={{ width: `${width}%`, background: accent }}
       />
     </div>
   );

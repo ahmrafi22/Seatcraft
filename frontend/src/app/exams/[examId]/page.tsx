@@ -78,13 +78,13 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
 
         <Reveal>
           <div className="mb-4 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
-            <MiniStat label="Candidates" value={exam.candidateCount.toLocaleString()} accent="var(--color-violet)" />
-            <MiniStat label="Halls" value={exam.hallCount} accent="var(--color-cyan)" />
-            <MiniStat label="Runs" value={runs.length} accent="var(--color-indigo)" />
+            <MiniStat label="Candidates" value={exam.candidateCount.toLocaleString()} accent="var(--color-teal)" />
+            <MiniStat label="Halls" value={exam.hallCount} accent="var(--color-sky)" />
+            <MiniStat label="Runs" value={runs.length} accent="var(--color-emerald)" />
             <MiniStat
               label="Blocking violations"
               value={blocking}
-              accent={blocking === 0 ? "var(--color-emerald)" : "var(--color-rose)"}
+              accent={blocking === 0 ? "var(--color-emerald)" : "var(--color-danger)"}
             />
           </div>
         </Reveal>
@@ -132,7 +132,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
                             </td>
                             <td className="px-4 py-3 font-mono text-ink-2 tabular-nums">{hall.capacity}</td>
                             <td className="px-4 py-3 font-mono text-ink-2 tabular-nums">{hall.blockedSeats.length}</td>
-                            <td className="px-4 py-3 font-mono font-semibold text-cyan tabular-nums">{hall.usableCapacity}</td>
+                            <td className="px-4 py-3 font-mono font-semibold text-sky tabular-nums">{hall.usableCapacity}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -167,7 +167,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
                         <div className="label-mono">Violations</div>
                         <div
                           className="mt-0.5 text-[20px] font-semibold tabular-nums"
-                          style={{ color: blocking === 0 ? "var(--color-emerald)" : "var(--color-rose)" }}
+                          style={{ color: blocking === 0 ? "var(--color-emerald)" : "var(--color-danger)" }}
                         >
                           {plan.violations.length}
                         </div>

@@ -18,10 +18,10 @@ export function Sidebar({ session }: { session: Session | null }) {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 z-30 hidden h-dvh w-[244px] shrink-0 flex-col gap-0.5 border-r border-white/[0.075] bg-[oklch(12%_.025_210/.55)] px-3 py-4 backdrop-blur-[26px] backdrop-saturate-150 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-white/[0.075] bg-[oklch(11%_0_0/.72)] px-3 py-4 backdrop-blur-[26px] backdrop-saturate-150 lg:flex">
       <Link href="/" className="mb-5 flex items-center gap-2.5 px-2 py-1.5">
-        <span className="grid size-[30px] place-items-center rounded-[9px] bg-[linear-gradient(140deg,oklch(64%_.14_192),oklch(68%_.14_222)_55%,oklch(78%_.15_165))] shadow-[inset_0_1px_0_oklch(100%_0_0/.45),0_0_0_1px_oklch(100%_0_0/.14),0_8px_18px_-8px_oklch(62%_.14_200/.9)]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" className="size-4">
+        <span className="grid size-[30px] place-items-center rounded-[9px] bg-[linear-gradient(140deg,oklch(96%_0_0),oklch(74%_0_0)_60%,oklch(56%_0_0))] shadow-[inset_0_1px_0_oklch(100%_0_0/.45),0_0_0_1px_oklch(100%_0_0/.14),0_8px_18px_-8px_oklch(0%_0_0/.9)]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="oklch(18% 0 0)" strokeWidth="2.3" strokeLinecap="round" className="size-4">
             <path d="M4 17V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" />
             <path d="M7 7V5h10v2" />
             <path d="M4 17h16" />
@@ -43,14 +43,14 @@ export function Sidebar({ session }: { session: Session | null }) {
               className={cn(
                 "relative flex items-center gap-2.5 rounded-[var(--radius-ctl)] px-2.5 py-2 text-[13.5px] font-medium transition-colors duration-150",
                 active
-                  ? "bg-[linear-gradient(100deg,oklch(75%_.145_192/.22),oklch(77%_.13_232/.10))] text-ink shadow-[inset_0_1px_0_oklch(100%_0_0/.14),0_0_0_1px_oklch(100%_0_0/.10)]"
+                  ? "bg-[linear-gradient(100deg,oklch(100%_0_0/.16),oklch(100%_0_0/.06))] text-ink shadow-[inset_0_1px_0_oklch(100%_0_0/.14),0_0_0_1px_oklch(100%_0_0/.10)]"
                   : "text-ink-2 hover:bg-white/[0.07] hover:text-ink"
               )}
             >
               {active ? (
                 <span
                   aria-hidden
-                  className="absolute top-2.5 -left-3 bottom-2.5 w-0.5 rounded-full bg-[linear-gradient(var(--color-teal),var(--color-sky))]"
+                  className="absolute top-2.5 -left-3 bottom-2.5 w-0.5 rounded-full bg-[linear-gradient(oklch(98%_0_0),oklch(70%_0_0))]"
                 />
               ) : null}
               <Icon className="size-[15px] shrink-0 opacity-90" />
@@ -62,13 +62,13 @@ export function Sidebar({ session }: { session: Session | null }) {
 
       <div className="mt-auto flex flex-col gap-2.5 border-t border-white/[0.075] pt-3.5">
         <div className="flex items-center gap-2 rounded-[var(--radius-ctl)] bg-white/[0.045] px-2.5 py-2 text-[11.5px] text-ink-2 shadow-[inset_0_1px_0_oklch(100%_0_0/.10),0_0_0_1px_var(--edge)]">
-          <span className="size-1.5 shrink-0 rounded-full bg-emerald shadow-[0_0_0_3px_oklch(80%_.17_160/.16),0_0_10px_var(--color-emerald)]" />
+          <span className="size-1.5 shrink-0 rounded-full bg-[oklch(96%_0_0)] shadow-[0_0_0_3px_oklch(100%_0_0/.12),0_0_10px_oklch(100%_0_0/.8)]" />
           <span>Connected to API</span>
         </div>
 
         {session ? (
           <div className="flex items-center gap-2.5 rounded-[var(--radius-ctl)] p-2 shadow-[inset_0_0_0_1px_var(--edge)]">
-            <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-[linear-gradient(140deg,oklch(84%_.09_195),oklch(86%_.1_225))] text-[11.5px] font-semibold text-[oklch(20%_.05_210)] shadow-[inset_0_1px_0_oklch(100%_0_0/.7),0_0_0_1px_oklch(100%_0_0/.18)]">
+            <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-[linear-gradient(140deg,oklch(92%_0_0),oklch(70%_0_0))] text-[11.5px] font-semibold text-[oklch(18%_0_0)] shadow-[inset_0_1px_0_oklch(100%_0_0/.7),0_0_0_1px_oklch(100%_0_0/.18)]">
               {session.user.displayName.slice(0, 2).toUpperCase()}
             </span>
             <div className="min-w-0 flex-1">

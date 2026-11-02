@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
-import { hueFor } from "@/lib/colors";
+import { stepFor } from "@/lib/colors";
 import { seatLabel } from "@/lib/format";
 import type { Hall, SeatAssignment } from "@/lib/api/types";
 
@@ -81,7 +81,7 @@ export function HallBoard({
         const isHover = hoverCell === cellKey;
         const isFlagged = Boolean(assignment && flagged.has(assignment.candidateId));
         const isSelected = Boolean(assignment && selectedCandidateId === assignment.candidateId);
-        const hue = assignment ? hueFor(assignment.institutionId) : 0;
+        const step = assignment ? stepFor(assignment.institutionId) : 80;
 
         if (seat.blocked) {
           return (
@@ -113,7 +113,7 @@ export function HallBoard({
               }}
               className={cn(
                 "aspect-square rounded-[7px] bg-white/[0.025] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.06)] transition-shadow",
-                isHover && "shadow-[0_0_0_2px_var(--color-sky),0_0_18px_oklch(82%_.14_205/.45)]"
+                isHover && "shadow-[0_0_0_2px_oklch(100%_0_0/.85),0_0_18px_oklch(100%_0_0/.3)]"
               )}
             />
           );
@@ -151,15 +151,15 @@ export function HallBoard({
               "transition-[transform,box-shadow,opacity] duration-150 ease-[var(--ease-out-soft)]",
               "hover:z-10 hover:-translate-y-0.5 disabled:cursor-default",
               isDragging && "opacity-30",
-              isHover && "shadow-[0_0_0_2px_var(--color-sky),0_0_20px_oklch(82%_.14_205/.5)]",
+              isHover && "shadow-[0_0_0_2px_oklch(100%_0_0/.9),0_0_20px_oklch(100%_0_0/.35)]",
               isSelected && "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent"
             )}
             style={{
-              background: `color-mix(in oklch, oklch(80% .17 ${hue}) 30%, transparent)`,
-              color: `color-mix(in oklch, oklch(88% .13 ${hue}) 70%, white)`,
+              background: `oklch(${step}% 0 0 / 0.26)`,
+              color: `oklch(${Math.min(98, step + 12)}% 0 0)`,
               boxShadow: isFlagged
                 ? "inset 0 1px 0 oklch(100% 0 0 / .25), 0 0 0 1.5px oklch(69% .20 27), 0 0 16px oklch(69% .20 27 / .55)"
-                : `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px color-mix(in oklch, oklch(82% .17 ${hue}) 58%, transparent), 0 4px 12px -6px color-mix(in oklch, oklch(80% .17 ${hue}) 75%, transparent)`
+                : `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px oklch(${step}% 0 0 / 0.55), 0 4px 12px -6px oklch(0% 0 0 / 0.7)`
             }}
           >
             {assignment.roll.slice(-3)}

@@ -5,8 +5,8 @@ import { cn } from "@/lib/cn";
 const CONTROL =
   "rounded-[var(--radius-ctl)] bg-white/[0.055] px-3.5 text-[13.5px] text-ink " +
   "shadow-[inset_0_1px_0_oklch(100%_0_0/.10),0_0_0_1px_var(--edge)] outline-none " +
-  "transition-[background,box-shadow] duration-150 placeholder:text-[oklch(62%_.015_215)] " +
-  "focus:bg-white/[0.075] focus:shadow-[inset_0_1px_0_oklch(100%_0_0/.14),0_0_0_1px_oklch(75%_.145_192/.75),0_0_0_4px_oklch(75%_.145_192/.16)]";
+  "transition-[background,box-shadow] duration-150 placeholder:text-[oklch(58%_0_0)] " +
+  "focus:bg-white/[0.075] focus:shadow-[inset_0_1px_0_oklch(100%_0_0/.14),0_0_0_1px_oklch(100%_0_0/.55),0_0_0_4px_oklch(100%_0_0/.10)]";
 
 export function Field({
   label,

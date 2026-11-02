@@ -102,26 +102,26 @@ export default async function DashboardPage() {
               label="Candidates"
               value={active?.candidateCount.toLocaleString() ?? "—"}
               foot={active ? `for ${active.title}` : "no exam yet"}
-              accent="var(--color-teal)"
+              accent="var(--color-accent)"
             />
             <Stat
               label="Seats assigned"
               value={assigned.toLocaleString()}
               suffix={active ? `/ ${usableSeats.toLocaleString()}` : undefined}
               foot={active ? `${percent(assigned, usableSeats)}% placed` : "run an allocation"}
-              accent="var(--color-sky)"
+              accent="var(--color-accent-2)"
             />
             <Stat
               label="Halls"
               value={active?.hallCount ?? "—"}
               foot={active ? `${exams.length} exam${exams.length === 1 ? "" : "s"} on record` : "—"}
-              accent="var(--color-emerald)"
+              accent="var(--color-accent-2)"
             />
             <Stat
               label="Blocking violations"
               value={blocking}
               foot={blocking === 0 ? "plan is publishable" : "resolve before publishing"}
-              accent={blocking === 0 ? "var(--color-emerald)" : "var(--color-danger)"}
+              accent={blocking === 0 ? "var(--color-ok)" : "var(--color-danger)"}
             />
           </div>
         </Reveal>
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                               </td>
                               <td
                                 className="px-4 py-3 font-mono tabular-nums"
-                                style={{ color: run.bestViolationCount === 0 ? "var(--color-emerald)" : "var(--color-danger)" }}
+                                style={{ color: run.bestViolationCount === 0 ? "var(--color-ok)" : "var(--color-danger)" }}
                               >
                                 {run.bestViolationCount}
                               </td>
