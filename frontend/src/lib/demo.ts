@@ -1,0 +1,18 @@
+import "server-only";
+
+/**
+ * The one-click demo sign-in is always on in development and off in a production
+ * build unless `SEATCRAFT_DEMO_LOGIN=1` is set. Both the page and the action read
+ * this, so the button and the endpoint cannot disagree.
+ */
+export function isDemoLoginEnabled(): boolean {
+  if (process.env.SEATCRAFT_DEMO_LOGIN === "1") return true;
+  if (process.env.SEATCRAFT_DEMO_LOGIN === "0") return false;
+
+  return process.env.NODE_ENV !== "production";
+}
+
+export const DEMO_CREDENTIALS = {
+  email: process.env.SEATCRAFT_DEMO_EMAIL ?? "admin@demo.test",
+  password: process.env.SEATCRAFT_DEMO_PASSWORD ?? "Passw0rd!123"
+};

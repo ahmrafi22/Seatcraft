@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { requireSession } from "@/lib/auth-guard";
-import { encodeSession, SESSION_COOKIE } from "@/lib/session";
+import { encodeSession, sessionCookieOptions, SESSION_COOKIE } from "@/lib/session";
 import type { Exam, Session } from "@/lib/api/types";
 
 export interface ActionResult {
@@ -21,8 +21,6 @@ export interface ExamConstraintsInput {
   maintainRollOrder: boolean;
   allowHallSkipping: boolean;
 }
-
-const MAX_AGE = 60 * 60 * 8;
 
 export async function loginAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const email = String(formData.get("email") ?? "").trim();
@@ -39,13 +37,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
 
     const store = await cookies();
 
-    store.set(SESSION_COOKIE, encodeSession(session), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: MAX_AGE
-    });
+    store.set(SESSION_COOKIE, encodeSession(session), sessionCookieOptions());
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not reach the API." };
   }

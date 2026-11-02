@@ -10,7 +10,9 @@ import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { Alert } from "@/components/ui/alert";
 import { MetricBar } from "@/components/ui/progress";
+import { DemoLoginButton } from "@/components/auth/demo-login-button";
 import { api } from "@/lib/api/client";
+import { isDemoLoginEnabled } from "@/lib/demo";
 import { getSession } from "@/lib/session";
 import { duration, percent, shortDate } from "@/lib/format";
 import { institutionColor } from "@/lib/colors";
@@ -20,6 +22,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const session = await getSession();
+  const demoEnabled = isDemoLoginEnabled();
 
   if (!session) {
     return (
@@ -31,12 +34,18 @@ export default async function DashboardPage() {
             <p className="mt-2 mb-6 text-[14px] text-ink-2">
               Exam seat allocation and admit-card engine. Sign in with the demo tenant to see live data.
             </p>
-            <div className="flex gap-2.5">
-              <ButtonLink href="/login" variant="primary" iconRight={<LuArrowRight />}>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {demoEnabled ? <DemoLoginButton enabled size="md" /> : null}
+              <ButtonLink href="/login" variant={demoEnabled ? "default" : "primary"} iconRight={<LuArrowRight />}>
                 Sign in
               </ButtonLink>
               <ButtonLink href="/lookup">Public seat lookup</ButtonLink>
             </div>
+            {demoEnabled ? (
+              <p className="mt-3 text-[12px] text-ink-3">
+                The demo opens a seeded workspace: 500 candidates, 12 halls, one published plan.
+              </p>
+            ) : null}
           </Reveal>
         </main>
       </>

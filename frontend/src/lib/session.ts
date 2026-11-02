@@ -4,6 +4,19 @@ import type { Session } from "@/lib/api/types";
 export const SESSION_COOKIE = "seatcraft_session";
 export const TENANT_COOKIE = "seatcraft_tenant";
 
+export const SESSION_MAX_AGE = 60 * 60 * 8;
+
+/** One set of flags for every path that signs a user in, so they cannot drift apart. */
+export function sessionCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SESSION_MAX_AGE
+  };
+}
+
 /**
  * The session lives in a cookie, so it is base64url-encoded JSON: no quotes,
  * braces or slashes to trip over cookie parsing.
