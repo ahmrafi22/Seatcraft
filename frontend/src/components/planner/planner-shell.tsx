@@ -198,7 +198,7 @@ export function PlannerShell({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-x-4.5 gap-y-2.5 text-[12.5px] text-ink-2">
-              <LegendSwatch style={{ background: "oklch(78% 0.055 205 / 0.5)" }} label="Seat taken" />
+              <LegendSwatch style={{ background: seatFill("legend") }} label="Seat taken" />
               <LegendSwatch style={{ background: "oklch(100% 0 0 / .08)" }} label="Empty" />
               <LegendSwatch
                 style={{

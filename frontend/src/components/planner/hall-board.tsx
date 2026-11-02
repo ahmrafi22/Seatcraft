@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
-import { tintFor } from "@/lib/colors";
+import { seatFill, seatInk, seatRim } from "@/lib/colors";
 import { seatLabel } from "@/lib/format";
 import type { Hall, SeatAssignment } from "@/lib/api/types";
 
@@ -81,8 +81,6 @@ export function HallBoard({
         const isHover = hoverCell === cellKey;
         const isFlagged = Boolean(assignment && flagged.has(assignment.candidateId));
         const isSelected = Boolean(assignment && selectedCandidateId === assignment.candidateId);
-        const tint = assignment ? tintFor(assignment.institutionId) : null;
-        const tintCss = tint ? `${tint.lightness}% ${tint.chroma} ${tint.hue}` : "";
 
         if (seat.blocked) {
           return (
@@ -156,11 +154,13 @@ export function HallBoard({
               isSelected && "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent"
             )}
             style={{
-              background: `oklch(${tintCss} / 0.3)`,
-              color: `oklch(${tint ? Math.min(98, tint.lightness + 12) : 92}% ${tint ? tint.chroma * 0.7 : 0} ${tint ? tint.hue : 0})`,
+              background: assignment ? seatFill(assignment.institutionId) : undefined,
+              color: assignment ? seatInk(assignment.institutionId) : undefined,
               boxShadow: isFlagged
-                ? "inset 0 1px 0 oklch(100% 0 0 / .25), 0 0 0 1.5px oklch(69% .20 27), 0 0 16px oklch(69% .20 27 / .55)"
-                : `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px oklch(${tintCss} / 0.58), 0 4px 12px -6px oklch(0% 0 0 / 0.7)`
+                ? "inset 0 1px 0 oklch(100% 0 0 / .35), 0 0 0 2px oklch(69% .20 27), 0 0 18px oklch(69% .20 27 / .7)"
+                : assignment
+                  ? `inset 0 1px 0 oklch(100% 0 0 / .45), inset 0 -1px 0 oklch(0% 0 0 / .18), 0 0 0 1px ${seatRim(assignment.institutionId)}, 0 3px 10px -4px oklch(0% 0 0 / .85)`
+                  : undefined
             }}
           >
             {assignment.roll.slice(-3)}

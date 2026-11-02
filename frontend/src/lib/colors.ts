@@ -1,19 +1,29 @@
 /**
  * Seats are the one place colour survives the monochrome scheme.
  *
- * Each institution gets a low-chroma tint: close enough to ash to belong to the
- * palette, far enough apart that clusters are readable on a hall board. Hue
- * alone would be a rainbow again, so the tints also vary in lightness.
+ * The first attempt used a narrow hue band at very low chroma, which read as
+ * eight slightly different greys. This is a jewel palette instead: hues spread
+ * right around the wheel, chroma high enough to actually name the colour, and
+ * lightness alternating so neighbouring colleges separate on tone as well as
+ * hue — which also keeps them apart for colour-blind readers.
+ *
+ * Tiles stay in a light band with dark ink, so the board reads as coloured
+ * chips on charcoal rather than a candy store. That is the "goes with
+ * monochrome" part: the chrome around them is still white on ash.
  */
 const TINTS = [
-  { lightness: 80, chroma: 0.055, hue: 200 },
-  { lightness: 74, chroma: 0.06, hue: 232 },
-  { lightness: 84, chroma: 0.045, hue: 168 },
-  { lightness: 70, chroma: 0.06, hue: 212 },
-  { lightness: 86, chroma: 0.04, hue: 188 },
-  { lightness: 76, chroma: 0.055, hue: 250 },
-  { lightness: 72, chroma: 0.05, hue: 178 },
-  { lightness: 82, chroma: 0.05, hue: 220 }
+  { lightness: 70, chroma: 0.15, hue: 15 }, // coral
+  { lightness: 76, chroma: 0.15, hue: 40 }, // orange
+  { lightness: 82, chroma: 0.13, hue: 65 }, // gold
+  { lightness: 78, chroma: 0.14, hue: 95 }, // chartreuse
+  { lightness: 72, chroma: 0.15, hue: 130 }, // lime
+  { lightness: 76, chroma: 0.14, hue: 155 }, // green
+  { lightness: 70, chroma: 0.13, hue: 175 }, // sea
+  { lightness: 78, chroma: 0.12, hue: 195 }, // teal
+  { lightness: 72, chroma: 0.14, hue: 215 }, // cyan
+  { lightness: 76, chroma: 0.15, hue: 240 }, // blue
+  { lightness: 70, chroma: 0.16, hue: 265 }, // indigo
+  { lightness: 74, chroma: 0.15, hue: 288 } // violet
 ];
 
 export interface Tint {
@@ -37,25 +47,31 @@ export function tintFor(seed: string): Tint {
   return TINTS[hashOf(seed) % TINTS.length] ?? TINTS[0]!;
 }
 
+/** Solid colour, for bars, dots and legends. */
 export function institutionColor(seed: string): string {
   const tint = tintFor(seed);
   return `oklch(${tint.lightness}% ${tint.chroma} ${tint.hue})`;
 }
 
-/** Soft seat fill: readable number on a tinted glass tile. */
+/**
+ * Seat fill. Near-opaque with a slight top-to-bottom lift, because a 30%-alpha
+ * wash over charcoal is what made every tile look identical last time.
+ */
 export function seatFill(seed: string): string {
   const tint = tintFor(seed);
-  return `oklch(${tint.lightness}% ${tint.chroma} ${tint.hue} / 0.3)`;
+  return `linear-gradient(158deg, oklch(${tint.lightness + 5}% ${tint.chroma} ${tint.hue}), oklch(${tint.lightness - 7}% ${tint.chroma} ${tint.hue}))`;
 }
 
+/** Darker, denser version of the same hue — a crisp edge instead of a glow. */
 export function seatRim(seed: string): string {
   const tint = tintFor(seed);
-  return `oklch(${tint.lightness}% ${tint.chroma} ${tint.hue} / 0.58)`;
+  return `oklch(${tint.lightness - 22}% ${Math.min(0.2, tint.chroma * 1.15)} ${tint.hue} / 0.9)`;
 }
 
+/** Dark ink tinted toward the tile's own hue, so the number looks printed on it. */
 export function seatInk(seed: string): string {
   const tint = tintFor(seed);
-  return `oklch(${Math.min(98, tint.lightness + 12)}% ${tint.chroma * 0.7} ${tint.hue})`;
+  return `oklch(20% 0.05 ${tint.hue})`;
 }
 
 /** Ash step, for chrome that must stay colourless. */

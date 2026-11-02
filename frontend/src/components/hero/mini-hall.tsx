@@ -1,6 +1,6 @@
 "use client";
 
-import { tintFor } from "@/lib/colors";
+import { seatFill, seatRim, tintFor } from "@/lib/colors";
 
 /**
  * Decorative hall grid for the hero. Cells light up in institution tints with a
@@ -24,9 +24,8 @@ export function MiniHall({
   const cells = Array.from({ length: rows * columns }, (_, index) => {
     const mixed = (index * 37 + seed * 11) % 100;
     const taken = mixed % 7 !== 0;
-    const tint = tintFor(`seat-${mixed}`);
 
-    return { taken, tint, index };
+    return { taken, index };
   });
 
   return (
@@ -36,7 +35,7 @@ export function MiniHall({
       aria-hidden
     >
       {cells.map((cell) => {
-        const css = `${cell.tint.lightness}% ${cell.tint.chroma} ${cell.tint.hue}`;
+        const seed = `seat-${cell.index}`;
 
         return (
           <div
@@ -44,9 +43,9 @@ export function MiniHall({
             className="cell-pop aspect-square rounded-[4px]"
             style={{
               animationDelay: `${0.25 + cell.index * 0.006}s`,
-              background: cell.taken ? `oklch(${css} / 0.3)` : "oklch(100% 0 0 / .05)",
+              background: cell.taken ? seatFill(seed) : "oklch(100% 0 0 / .05)",
               boxShadow: cell.taken
-                ? `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px oklch(${css} / .5)`
+                ? `inset 0 1px 0 oklch(100% 0 0 / .4), 0 0 0 1px ${seatRim(seed)}`
                 : "inset 0 0 0 1px oklch(100% 0 0 / .05)"
             }}
           />
