@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import { LuCheck, LuTriangleAlert } from "react-icons/lu";
 
 import { Switch } from "@/components/ui/switch";
@@ -68,10 +67,10 @@ export function ConstraintEditor({ examId, constraints }: { examId: string; cons
       ))}
 
       {error ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 flex items-center gap-2 text-[12.5px] text-danger">
+        <div className="reveal mt-3 flex items-center gap-2 text-[12.5px] text-danger">
           <LuTriangleAlert className="size-3.5" />
           {error}
-        </motion.div>
+        </div>
       ) : null}
 
       {pending ? (

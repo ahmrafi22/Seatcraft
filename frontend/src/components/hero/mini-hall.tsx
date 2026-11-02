@@ -1,12 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
-
 import { hueFor } from "@/lib/colors";
 
 /**
  * Decorative hall grid for the hero. Cells light up in institution colours with a
  * staggered wave, which is the whole visual pitch in one small canvas.
+ *
+ * The stagger is a CSS animation delay rather than a client-side animation
+ * library: this renders ~70 cells, and the effect is identical.
  */
 export function MiniHall({
   rows = 6,
@@ -34,22 +35,16 @@ export function MiniHall({
       aria-hidden
     >
       {cells.map((cell) => (
-        <motion.div
+        <div
           key={cell.index}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.42,
-            delay: 0.25 + cell.index * 0.006,
-            ease: [0.22, 1, 0.36, 1]
-          }}
-          className="aspect-square rounded-[4px]"
+          className="cell-pop aspect-square rounded-[4px]"
           style={{
+            animationDelay: `${0.25 + cell.index * 0.006}s`,
             background: cell.taken
-              ? `color-mix(in oklch, oklch(72% .18 ${cell.hue}) 40%, transparent)`
+              ? `color-mix(in oklch, oklch(80% .17 ${cell.hue}) 30%, transparent)`
               : "oklch(100% 0 0 / .05)",
             boxShadow: cell.taken
-              ? `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px color-mix(in oklch, oklch(72% .18 ${cell.hue}) 55%, transparent)`
+              ? `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px color-mix(in oklch, oklch(82% .17 ${cell.hue}) 58%, transparent)`
               : "inset 0 0 0 1px oklch(100% 0 0 / .05)"
           }}
         />
@@ -66,7 +61,7 @@ export function HueDots({ codes }: { codes: string[] }) {
         <span
           key={code}
           className="size-[9px] rounded-[2px]"
-          style={{ background: `oklch(72% .18 ${hueFor(code)})` }}
+          style={{ background: `oklch(80% .17 ${hueFor(code)})` }}
         />
       ))}
     </div>

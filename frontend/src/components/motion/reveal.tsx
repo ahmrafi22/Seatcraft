@@ -1,9 +1,14 @@
-"use client";
-
-import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
-/** Fade + rise on mount, staggered by `delay`. Used for page sections. */
+import { cn } from "@/lib/cn";
+
+/**
+ * Fade + rise on mount, staggered by `delay`.
+ *
+ * Deliberately a server component driven by a CSS animation: this wraps nearly
+ * every page section, and routing it through a client-side animation library put
+ * the whole runtime in the shared bundle just to fade a box in.
+ */
 export function Reveal({
   children,
   delay = 0,
@@ -14,13 +19,8 @@ export function Reveal({
   className?: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.42, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
+    <div className={cn("reveal", className)} style={{ animationDelay: `${delay}s` }}>
       {children}
-    </motion.div>
+    </div>
   );
 }

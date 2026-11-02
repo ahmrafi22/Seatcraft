@@ -107,6 +107,41 @@ body::before {
 }
 
 /* ==========================================================================
+   Entrance animation — see components/motion/reveal.tsx
+   ========================================================================== */
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: reveal-in 0.42s var(--ease-out-soft) both;
+}
+
+/* Hero hall cells. The stagger comes from an inline animation-delay. */
+@keyframes cell-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cell-pop {
+  animation: cell-pop 0.42s var(--ease-out-soft) both;
+}
+
+/* ==========================================================================
    Glass primitives — plain CSS so every component shares one definition
    ========================================================================== */
 
@@ -150,6 +185,8 @@ body::before {
   -webkit-text-fill-color: transparent;
 }
 
+/* Entrance used by <Reveal>. One shared keyframe instead of a JS animation
+   library, so the effect costs nothing in the client bundle. */
 @utility label-mono {
   font-family: var(--font-mono);
   font-size: 0.65rem;

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
 import { LuPlay, LuBan, LuCircleCheck, LuLoaderCircle } from "react-icons/lu";
 
 import { Alert } from "@/components/ui/alert";
@@ -124,17 +123,15 @@ export function AllocationPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <AnimatePresence>
-        {notice ? (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <Alert tone={notice.tone} icon={notice.tone === "success" ? <LuCircleCheck /> : <LuBan />} title={notice.text}>
-              <button type="button" onClick={() => setNotice(null)} className="mt-1 text-[12px] underline underline-offset-2 opacity-70">
-                dismiss
-              </button>
-            </Alert>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {notice ? (
+        <div className="reveal">
+          <Alert tone={notice.tone} icon={notice.tone === "success" ? <LuCircleCheck /> : <LuBan />} title={notice.text}>
+            <button type="button" onClick={() => setNotice(null)} className="mt-1 text-[12px] underline underline-offset-2 opacity-70">
+              dismiss
+            </button>
+          </Alert>
+        </div>
+      ) : null}
 
       <div className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-4 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">
         <div className="label-mono mb-2.5">Start a run</div>
@@ -162,23 +159,16 @@ export function AllocationPanel({
           </p>
         ) : null}
 
-        <AnimatePresence>
-          {isWorking && activeRun ? (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-3.5 flex items-center gap-2 text-[12.5px] text-ink-2">
-                <LuLoaderCircle className="size-3.5 animate-spin text-teal" />
-                <span className="font-medium">{activeRun.currentPhase ?? activeRun.status}</span>
-                <span className="ml-auto font-mono text-[11.5px] text-ink-3">{activeRun.progressPercent}%</span>
-              </div>
-              <Progress value={activeRun.progressPercent} accent="var(--color-teal)" className="mt-2" />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        {isWorking && activeRun ? (
+          <div className="reveal overflow-hidden">
+            <div className="mt-3.5 flex items-center gap-2 text-[12.5px] text-ink-2">
+              <LuLoaderCircle className="size-3.5 animate-spin text-teal" />
+              <span className="font-medium">{activeRun.currentPhase ?? activeRun.status}</span>
+              <span className="ml-auto font-mono text-[11.5px] text-ink-3">{activeRun.progressPercent}%</span>
+            </div>
+            <Progress value={activeRun.progressPercent} accent="var(--color-teal)" className="mt-2" />
+          </div>
+        ) : null}
       </div>
 
       <div className="overflow-hidden rounded-[var(--radius-pane)] bg-white/[0.035] shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">

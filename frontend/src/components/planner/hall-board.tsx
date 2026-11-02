@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import { hueFor } from "@/lib/colors";
@@ -63,11 +62,9 @@ export function HallBoard({
   const seats = useMemo(() => buildSeats(hall, assignments), [hall, assignments]);
   const [dragFrom, setDragFrom] = useState<SeatAssignment | null>(null);
   const [hoverCell, setHoverCell] = useState<string | null>(null);
-  const boardRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
-      ref={boardRef}
       className="glass-well -mx-4 overflow-x-auto rounded-none px-4 py-4 sm:mx-0 sm:rounded-[var(--radius-pane)] sm:p-4"
       style={{
         display: "grid",
@@ -123,10 +120,9 @@ export function HallBoard({
         }
 
         return (
-          <motion.button
+          <button
             key={cellKey}
             type="button"
-            layout
             draggable={!disabled}
             disabled={disabled}
             title={`${assignment.roll} · ${assignment.fullName}\n${assignment.institutionName}\nSeat ${seatLabel(seat.row, seat.column)}`}
@@ -167,7 +163,7 @@ export function HallBoard({
             }}
           >
             {assignment.roll.slice(-3)}
-          </motion.button>
+          </button>
         );
       })}
     </div>

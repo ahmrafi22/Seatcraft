@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
 import { LuLayoutDashboard, LuListChecks, LuSearch, LuLogOut } from "react-icons/lu";
 
 import { cn } from "@/lib/cn";
@@ -49,10 +48,9 @@ export function Sidebar({ session }: { session: Session | null }) {
               )}
             >
               {active ? (
-                <motion.span
-                  layoutId="nav-rail"
+                <span
+                  aria-hidden
                   className="absolute top-2.5 -left-3 bottom-2.5 w-0.5 rounded-full bg-[linear-gradient(var(--color-teal),var(--color-sky))]"
-                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
                 />
               ) : null}
               <Icon className="size-[15px] shrink-0 opacity-90" />

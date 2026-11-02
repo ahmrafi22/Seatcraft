@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
 import { LuCheck, LuTriangleAlert, LuArmchair, LuSend } from "react-icons/lu";
 
 import { HallBoard } from "@/components/planner/hall-board";
@@ -140,21 +139,19 @@ export function PlannerShell({
         </div>
       </div>
 
-      <AnimatePresence>
-        {notice ? (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <Alert
-              tone={notice.tone}
-              icon={notice.tone === "success" ? <LuCheck /> : <LuTriangleAlert />}
-              title={notice.text}
-            >
-              <button type="button" onClick={() => setNotice(null)} className="mt-1 text-[12px] underline underline-offset-2 opacity-70">
-                dismiss
-              </button>
-            </Alert>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {notice ? (
+        <div className="reveal">
+          <Alert
+            tone={notice.tone}
+            icon={notice.tone === "success" ? <LuCheck /> : <LuTriangleAlert />}
+            title={notice.text}
+          >
+            <button type="button" onClick={() => setNotice(null)} className="mt-1 text-[12px] underline underline-offset-2 opacity-70">
+              dismiss
+            </button>
+          </Alert>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_306px]">
         <Pane>
