@@ -37,6 +37,9 @@ services:
       Jwt__Audience: seatcraft-api
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY is required}
       EnableSwagger: "true"
+      # The public demo workspace is seeded through this endpoint. It is admin-only
+      # and still requires a real login, so this only removes the environment gate.
+      DemoSeed__Enabled: ${DEMO_SEED_ENABLED:-false}
     ports:
       - "${API_PORT:-8080}:8080"
     depends_on:

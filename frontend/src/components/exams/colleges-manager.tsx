@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LuCheck, LuPencil, LuPlus, LuTrash2, LuX } from "react-icons/lu";
 
 import { Alert } from "@/components/ui/alert";
+import { AutofillButton } from "@/components/ui/autofill-button";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Dialog } from "@/components/ui/dialog";
@@ -14,6 +15,7 @@ import {
   updateInstitutionAction
 } from "@/app/actions/exam";
 import type { ActionResult } from "@/app/actions/auth";
+import { COLLEGES } from "@/lib/bd-data";
 import type { Institution } from "@/lib/api/types";
 
 /**
@@ -28,6 +30,20 @@ export function CollegesManager({ institutions }: { institutions: Institution[] 
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [state, formAction, creating] = useActionState<ActionResult | null, FormData>(createInstitutionAction, null);
+
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+
+  function autofill() {
+    // Skip colleges already on the tenant so the autofill never duplicates a code.
+    const taken = new Set(institutions.map((entry) => entry.code.toUpperCase()));
+    const available = COLLEGES.filter((entry) => !taken.has(entry.code));
+    const source = available.length > 0 ? available : COLLEGES;
+    const pick = source[Math.floor(Math.random() * source.length)] ?? COLLEGES[0]!;
+
+    setName(pick.name);
+    setCode(pick.code);
+  }
 
   function remove(institution: Institution) {
     setError(null);
@@ -52,13 +68,33 @@ export function CollegesManager({ institutions }: { institutions: Institution[] 
         action={formAction}
         className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-4 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]"
       >
-        <div className="label-mono mb-2.5">Add a college</div>
+        <div className="mb-2.5 flex items-center justify-between gap-2">
+          <span className="label-mono">Add a college</span>
+          <AutofillButton onFill={autofill} label="Autofill" />
+        </div>
         <div className="grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_140px_auto] sm:items-end">
           <Field label="Name" htmlFor="new-name">
-            <Input id="new-name" name="name" placeholder="Ideal College, Dhaka" required maxLength={160} />
+            <Input
+              id="new-name"
+              name="name"
+              placeholder="Notre Dame College, Dhaka"
+              required
+              maxLength={160}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
           </Field>
           <Field label="Code" htmlFor="new-code">
-            <Input id="new-code" name="code" placeholder="IC01" required maxLength={20} className="font-mono uppercase" />
+            <Input
+              id="new-code"
+              name="code"
+              placeholder="NDC"
+              required
+              maxLength={20}
+              className="font-mono uppercase"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+            />
           </Field>
           <Button type="submit" variant="primary" loading={creating} icon={<LuPlus />}>
             Add

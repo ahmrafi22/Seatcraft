@@ -5,10 +5,20 @@ using SeatCraft.Application.Seed;
 
 namespace SeatCraft.Api.Controllers;
 
-/// <summary>Development helper that builds a demo exam in one call.</summary>
+/// <summary>
+/// Builds a demo workspace in one call.
+///
+/// Allowed in Development/Testing by default. In any other environment it needs
+/// an explicit opt-in (<c>DemoSeed__Enabled=true</c>), because it writes a lot of
+/// rows; the host that serves the public demo sets that flag deliberately.
+/// Admin-only either way.
+/// </summary>
 [Route("api/dev/seed-demo")]
 [Authorize(Roles = "Admin")]
-public sealed class DevSeedController(DemoSeedService seedService, IWebHostEnvironment environment) : ApiControllerBase
+public sealed class DevSeedController(
+    DemoSeedService seedService,
+    IWebHostEnvironment environment,
+    IConfiguration configuration) : ApiControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Seed(
@@ -17,7 +27,7 @@ public sealed class DevSeedController(DemoSeedService seedService, IWebHostEnvir
         [FromQuery] int halls = 12,
         CancellationToken cancellationToken = default)
     {
-        if (!environment.IsDevelopment() && !environment.IsEnvironment("Testing"))
+        if (!IsEnabled())
             return NotFound();
 
         var result = await seedService.SeedAsync(
@@ -28,4 +38,9 @@ public sealed class DevSeedController(DemoSeedService seedService, IWebHostEnvir
 
         return OkJson(result);
     }
+
+    private bool IsEnabled() =>
+        environment.IsDevelopment()
+        || environment.IsEnvironment("Testing")
+        || configuration.GetValue<bool>("DemoSeed:Enabled");
 }

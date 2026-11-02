@@ -6,10 +6,12 @@ import Link from "next/link";
 import { LuPlus } from "react-icons/lu";
 
 import { Alert } from "@/components/ui/alert";
+import { AutofillButton } from "@/components/ui/autofill-button";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
+import { EXAM_DESCRIPTIONS, EXAM_TITLES } from "@/lib/bd-data";
 import { createExamWithDataAction, type CreateExamWizardResult } from "@/app/actions/exam";
 import type { Institution } from "@/lib/api/types";
 
@@ -27,8 +29,26 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
     null
   );
 
+  // Controlled so the autofill button can populate them for review before submit.
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [hallCount, setHallCount] = useState(1);
+  const [rows, setRows] = useState(10);
+  const [columns, setColumns] = useState(10);
+  const [candidateCount, setCandidateCount] = useState(0);
+
   function toggle(id: string) {
     setSelected((current) => (current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]));
+  }
+
+  function autofill() {
+    setTitle(EXAM_TITLES[Math.floor(Math.random() * EXAM_TITLES.length)] ?? "HSC Admission Test 2026");
+    setDescription(EXAM_DESCRIPTIONS[Math.floor(Math.random() * EXAM_DESCRIPTIONS.length)] ?? "");
+    setHallCount(2 + Math.floor(Math.random() * 3));
+    setRows(8 + Math.floor(Math.random() * 4));
+    setColumns(8 + Math.floor(Math.random() * 4));
+    setCandidateCount(120 + Math.floor(Math.random() * 180));
+    setSelected(institutions.map((entry) => entry.id));
   }
 
   // The action returns the new exam id; jump straight into it so the next step
@@ -54,13 +74,34 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
         description="Everything allocation needs, in one step."
       >
         <form action={formAction} className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="label-mono">Exam</span>
+            <AutofillButton onFill={autofill} label="Autofill sample data" />
+          </div>
+
           <div className="flex flex-col gap-3.5">
             <Field label="Exam title" htmlFor="wiz-title">
-              <Input id="wiz-title" name="title" placeholder="HSC Admission Test 2026" required maxLength={160} />
+              <Input
+                id="wiz-title"
+                name="title"
+                placeholder="HSC Admission Test 2026"
+                required
+                maxLength={160}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
             </Field>
 
             <Field label="Description" htmlFor="wiz-description" hint="Optional — shown on the dashboard.">
-              <Textarea id="wiz-description" name="description" rows={2} placeholder="Session 2026–27, morning shift" maxLength={400} />
+              <Textarea
+                id="wiz-description"
+                name="description"
+                rows={2}
+                placeholder="Session 2026–27, morning shift"
+                maxLength={400}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+              />
             </Field>
           </div>
 
@@ -68,13 +109,37 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
             <div className="label-mono mb-2.5">Halls</div>
             <div className="grid grid-cols-3 gap-2.5">
               <Field label="How many" htmlFor="wiz-halls">
-                <Input id="wiz-halls" name="hallCount" type="number" defaultValue={1} min={0} max={50} />
+                <Input
+                  id="wiz-halls"
+                  name="hallCount"
+                  type="number"
+                  min={0}
+                  max={50}
+                  value={hallCount}
+                  onChange={(event) => setHallCount(Number(event.target.value))}
+                />
               </Field>
               <Field label="Rows" htmlFor="wiz-rows">
-                <Input id="wiz-rows" name="rows" type="number" defaultValue={10} min={1} max={100} />
+                <Input
+                  id="wiz-rows"
+                  name="rows"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={rows}
+                  onChange={(event) => setRows(Number(event.target.value))}
+                />
               </Field>
               <Field label="Columns" htmlFor="wiz-cols">
-                <Input id="wiz-cols" name="columns" type="number" defaultValue={10} min={1} max={100} />
+                <Input
+                  id="wiz-cols"
+                  name="columns"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={columns}
+                  onChange={(event) => setColumns(Number(event.target.value))}
+                />
               </Field>
             </div>
             <p className="mt-2 text-[11.5px] text-ink-3">Each hall offers rows × columns seats. You can add more later.</p>
@@ -139,8 +204,16 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
 
           <div className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-3.5 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">
             <div className="label-mono mb-2.5">Candidates</div>
-            <Field label="How many" htmlFor="wiz-candidates" hint="Placeholder names, spread across the colleges you picked.">
-              <Input id="wiz-candidates" name="candidateCount" type="number" defaultValue={0} min={0} max={5000} />
+            <Field label="How many" htmlFor="wiz-candidates" hint="Real-sounding names, spread across the colleges you picked.">
+              <Input
+                id="wiz-candidates"
+                name="candidateCount"
+                type="number"
+                min={0}
+                max={5000}
+                value={candidateCount}
+                onChange={(event) => setCandidateCount(Number(event.target.value))}
+              />
             </Field>
             <p className="mt-2 text-[11.5px] text-ink-3">
               Leave at 0 to import your own CSV instead.

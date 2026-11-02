@@ -6,6 +6,7 @@ import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { requireAdmin, requireSession } from "@/lib/auth-guard";
 import type { AllocationRun, Exam, Institution, SeatPlanDetail, SeatPlan, SeedResult, Strategy } from "@/lib/api/types";
+import { FEMALE_NAMES, MALE_NAMES, SUBJECT_GROUPS } from "@/lib/bd-data";
 import type { ActionResult } from "@/app/actions/auth";
 
 /** Every action re-checks the session: Server Functions are reachable by direct POST. */
@@ -140,20 +141,24 @@ export async function createExamWithDataAction(
 /**
  * Builds the CSV the import endpoint expects, cycling the chosen colleges so the
  * spread looks realistic. Codes (not ids) are what the importer matches on.
+ *
+ * Names come from the shared Bangladeshi sample list so a generated roster reads
+ * like a real one. Names repeat once the pools are exhausted, but rolls stay
+ * unique — the importer keys on roll, not name.
  */
 function buildCandidateCsv(count: number, codes: string[]): string {
-  const groups = ["Science", "Commerce", "Arts"];
   const lines = ["roll,name,institutionCode,subjectGroup,dateOfBirth"];
 
   for (let index = 0; index < count; index += 1) {
     const roll = `R${String(index + 1).padStart(5, "0")}`;
-    const name = `Candidate ${String(index + 1).padStart(4, "0")}`;
-    const group = groups[index % groups.length] ?? "Science";
+    // Alternate the pools so the roster is not one gender in a block.
+    const pool = index % 2 === 0 ? MALE_NAMES : FEMALE_NAMES;
+    const name = pool[Math.floor(index / 2) % pool.length] ?? "Candidate";
+    const group = SUBJECT_GROUPS[index % SUBJECT_GROUPS.length] ?? "Science";
     const dob = `2000-${String((index % 12) + 1).padStart(2, "0")}-${String((index % 28) + 1).padStart(2, "0")}`;
     const code = codes[index % codes.length] ?? "";
 
-    lines.push(`${roll},${name},${code},${group},${dob}`);
-  }
+    lines.push(`${roll},${name},${code},${group},${dob}`);  }
 
   return lines.join("\n");
 }
@@ -173,7 +178,8 @@ export async function deleteExamAction(examId: string): Promise<ActionResult> {
   }
 }
 
-/** Adds one hall to an exam. Grid size is what decides how many seats it offers. */export async function createHallAction(examId: string, _prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+/** Adds one hall to an exam. Grid size is what decides how many seats it offers. */
+export async function createHallAction(examId: string, _prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   await requireSession();
 
   const name = String(formData.get("name") ?? "").trim();
