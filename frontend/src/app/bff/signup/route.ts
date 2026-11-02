@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   try {
     form = await request.formData();
   } catch {
-    return NextResponse.redirect(new URL("/signup?error=invalid", request.url), 303);
+    return redirectTo("/signup?error=invalid");
   }
 
   const tenantName = String(form.get("tenantName") ?? "").trim();
@@ -33,11 +33,9 @@ export async function POST(request: Request) {
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
 
-  const fail = (code: string) => NextResponse.redirect(new URL(`/signup?error=${code}`, request.url), 303);
-
-  if (!tenantName || !tenantSlug || !displayName || !email || !password) return fail("missing");
-  if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(tenantSlug)) return fail("slug");
-  if (password.length < 8) return fail("password");
+  if (!tenantName || !tenantSlug || !displayName || !email || !password) return redirectTo("/signup?error=missing");
+  if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(tenantSlug)) return redirectTo("/signup?error=slug");
+  if (password.length < 8) return redirectTo("/signup?error=password");
 
   let session: Session;
 
@@ -48,13 +46,22 @@ export async function POST(request: Request) {
       body: { tenantName, tenantSlug, email, password, displayName }
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 409) return fail("taken");
-    return fail("failed");
+    if (error instanceof ApiError && error.status === 409) return redirectTo("/signup?error=taken");
+    return redirectTo("/signup?error=failed");
   }
 
-  const response = NextResponse.redirect(new URL("/", request.url), 303);
+  const response = redirectTo("/");
   response.cookies.set(SESSION_COOKIE, encodeSession(session), sessionCookieOptions());
 
   revalidatePath("/", "layout");
   return response;
+}
+
+/**
+ * Relative Location on purpose: behind nginx the request URL carries the
+ * container's bind address (0.0.0.0:3000), so an absolute redirect would send
+ * the browser to a host it cannot reach.
+ */
+function redirectTo(path: string): NextResponse {
+  return new NextResponse(null, { status: 303, headers: { Location: path } });
 }
