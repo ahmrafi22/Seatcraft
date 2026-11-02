@@ -13,6 +13,7 @@ import { AddHallForm } from "@/components/exams/add-hall-form";
 import { AddInstitutionForm } from "@/components/exams/add-institution-form";
 import { AddCandidateForm } from "@/components/exams/add-candidate-form";
 import { ImportCandidatesForm } from "@/components/exams/import-candidates-form";
+import { DownloadCsvTemplate } from "@/components/exams/download-csv-template";
 import { DeleteExamButton } from "@/components/exams/delete-exam-button";
 import { api } from "@/lib/api/client";
 import { getSession } from "@/lib/session";
@@ -197,6 +198,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
                 </PaneBody>
                 <PaneBody className="border-t border-white/[0.07]">
                   <ImportCandidatesForm examId={exam.id} />
+                  <div className="mt-2">
+                    <DownloadCsvTemplate institutions={institutions} />
+                  </div>
                 </PaneBody>
               </Pane>
             </Reveal>

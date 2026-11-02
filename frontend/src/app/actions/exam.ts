@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { requireAdmin, requireSession } from "@/lib/auth-guard";
-import type { AllocationRun, Exam, SeatPlanDetail, SeatPlan, SeedResult, Strategy } from "@/lib/api/types";
+import type { AllocationRun, Exam, Institution, SeatPlanDetail, SeatPlan, SeedResult, Strategy } from "@/lib/api/types";
 import type { ActionResult } from "@/app/actions/auth";
 
 /** Every action re-checks the session: Server Functions are reachable by direct POST. */
@@ -15,29 +15,6 @@ async function guarded<T>(run: () => Promise<T>, fallback: string): Promise<T | 
   } catch (error) {
     if (error instanceof ApiError) return { ok: false, message: error.detail };
     return { ok: false, message: fallback };
-  }
-}
-
-export async function createExamAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  await requireSession();
-
-  const title = String(formData.get("title") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-
-  if (!title) return { ok: false, message: "Give the exam a title." };
-  if (title.length > 160) return { ok: false, message: "Keep the title under 160 characters." };
-
-  try {
-    const exam = await api<Exam>("/exams", {
-      method: "POST",
-      body: { title, description: description || null }
-    });
-
-    revalidatePath("/");
-    revalidatePath("/exams");
-    return { ok: true, message: `Created "${exam.title}".` };
-  } catch (error) {
-    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not create the exam." };
   }
 }
 
@@ -64,6 +41,134 @@ export async function seedDemoAction(_prev: ActionResult | null, formData: FormD
 
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not seed demo data." };
   }
+}
+
+export interface CreateExamWizardResult {
+  ok: boolean;
+  message?: string;
+  examId?: string;
+}
+
+/**
+ * Creates an exam and its starter data in one submit.
+ *
+ * Halls and colleges are cheap API calls, but candidates are not: creating 500
+ * of them one request at a time would take seconds. They are built into a CSV
+ * in memory and pushed through the same import endpoint the UI exposes, so the
+ * wizard and a manual upload exercise one code path.
+ */
+export async function createExamWithDataAction(
+  _prev: CreateExamWizardResult | null,
+  formData: FormData
+): Promise<CreateExamWizardResult> {
+  await requireSession();
+
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const hallCount = clamp(Number(formData.get("hallCount") ?? 0), 0, 50);
+  const rows = clamp(Number(formData.get("rows") ?? 10), 1, 100);
+  const columns = clamp(Number(formData.get("columns") ?? 10), 1, 100);
+  const candidateCount = clamp(Number(formData.get("candidateCount") ?? 0), 0, 5000);
+  const collegeCount = clamp(Number(formData.get("collegeCount") ?? 1), 1, 100);
+
+  if (!title) return { ok: false, message: "Give the exam a title." };
+
+  try {
+    const exam = await api<Exam>("/exams", {
+      method: "POST",
+      body: { title, description: description || null }
+    });
+
+    const notes: string[] = [];
+
+    for (let index = 1; index <= hallCount; index += 1) {
+      await api(`/exams/${exam.id}/halls`, {
+        method: "POST",
+        body: { name: `Hall ${String(index).padStart(2, "0")}`, rows, columns }
+      });
+    }
+
+    if (hallCount > 0) notes.push(`${hallCount} hall${hallCount === 1 ? "" : "s"}`);
+
+    if (candidateCount > 0) {
+      const codes = await ensureColleges(collegeCount);
+      const csv = buildCandidateCsv(candidateCount, codes);
+
+      const body = new FormData();
+      body.append("file", new File([csv], "candidates.csv", { type: "text/csv" }));
+
+      const imported = await api<{ imported: number; skipped: number }>(
+        `/exams/${exam.id}/candidates/import`,
+        { method: "POST", body }
+      );
+
+      notes.push(`${imported.imported} candidate${imported.imported === 1 ? "" : "s"}`);
+      if (imported.skipped > 0) notes.push(`${imported.skipped} skipped`);
+    }
+
+    revalidatePath("/");
+    revalidatePath("/exams");
+    revalidatePath(`/exams/${exam.id}`);
+
+    return {
+      ok: true,
+      examId: exam.id,
+      message: notes.length > 0 ? `Created "${exam.title}" with ${notes.join(", ")}.` : `Created "${exam.title}".`
+    };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not create the exam." };
+  }
+}
+
+/**
+ * Returns `count` institution codes, reusing ones already on the tenant before
+ * creating new ones. Codes are what the CSV import matches on, so they have to
+ * come back exactly as stored.
+ */
+async function ensureColleges(count: number): Promise<string[]> {
+  const existing = await api<Institution[]>("/institutions").catch(() => [] as Institution[]);
+  const codes = existing.slice(0, count).map((institution) => institution.code);
+  const taken = new Set(existing.map((institution) => institution.code.toUpperCase()));
+
+  let next = 1;
+
+  while (codes.length < count) {
+    let code = `C${String(next).padStart(2, "0")}`;
+
+    while (taken.has(code)) {
+      next += 1;
+      code = `C${String(next).padStart(2, "0")}`;
+    }
+
+    await api("/institutions", {
+      method: "POST",
+      body: { name: `College ${String(next).padStart(2, "0")}`, code }
+    });
+
+    taken.add(code);
+    codes.push(code);
+    next += 1;
+  }
+
+  return codes;
+}
+
+/** Same column order the import endpoint expects. */
+function buildCandidateCsv(count: number, codes: string[]): string {
+  const groups = ["Science", "Commerce", "Arts"];
+  const lines = ["roll,name,institutionCode,subjectGroup,dateOfBirth"];
+
+  for (let index = 0; index < count; index += 1) {
+    const roll = `R${String(index + 1).padStart(5, "0")}`;
+    const name = `Candidate ${String(index + 1).padStart(4, "0")}`;
+    const code = codes[index % codes.length] ?? "C01";
+    const group = groups[index % groups.length] ?? "Science";
+    const dob = `2000-${String((index % 12) + 1).padStart(2, "0")}-${String((index % 28) + 1).padStart(2, "0")}`;
+
+    lines.push(`${roll},${name},${code},${group},${dob}`);
+  }
+
+  return lines.join("\n");
 }
 
 /** Deletes an exam and everything under it. Admin-only, and irreversible. */

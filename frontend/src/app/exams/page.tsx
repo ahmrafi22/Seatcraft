@@ -7,7 +7,7 @@ import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
-import { CreateExamForm } from "@/components/exams/create-exam-form";
+import { CreateExamDialog } from "@/components/exams/create-exam-dialog";
 import { SeedDemoForm } from "@/components/exams/seed-demo-form";
 import { AddInstitutionForm } from "@/components/exams/add-institution-form";
 import { api } from "@/lib/api/client";
@@ -38,12 +38,15 @@ export default async function ExamsPage() {
             <h1 className="mt-1.5 text-[27px] font-semibold tracking-[-0.025em]">Exams</h1>
             <p className="mt-1 text-[13.5px] text-ink-3">Every exam, its state and how far its allocation has got.</p>
           </div>
-          <ButtonLink href="/lookup" variant="ghost" size="md">
-            Public lookup
-          </ButtonLink>
+          <div className="flex flex-wrap items-center gap-2">
+            <ButtonLink href="/lookup" variant="ghost" size="md">
+              Public lookup
+            </ButtonLink>
+            <CreateExamDialog />
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
           <Reveal>
             <Pane>
               <PaneHead title="All exams" hint={`${exams.length}`} />
@@ -51,7 +54,7 @@ export default async function ExamsPage() {
                 <PaneBody>
                   <div className="flex flex-col items-center gap-3 py-12 text-center">
                     <LuListChecks className="size-9 text-ink-3 opacity-40" />
-                    <div className="text-[13.5px] text-ink-3">No exams yet. Create one on the right.</div>
+                    <div className="text-[13.5px] text-ink-3">No exams yet. Use “New exam” to create your first.</div>
                   </div>
                 </PaneBody>
               ) : (
@@ -108,15 +111,6 @@ export default async function ExamsPage() {
 
           <div className="flex flex-col gap-4">
             <Reveal delay={0.06}>
-              <Pane>
-                <PaneHead title="New exam" />
-                <PaneBody>
-                  <CreateExamForm />
-                </PaneBody>
-              </Pane>
-            </Reveal>
-
-            <Reveal delay={0.09}>
               <Pane>
                 <PaneHead title="New college" hint="shared across exams" />
                 <PaneBody>

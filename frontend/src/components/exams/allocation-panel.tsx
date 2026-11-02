@@ -8,15 +8,15 @@ import { Alert } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Select } from "@/components/ui/field";
+import { cn } from "@/lib/cn";
 import { duration, dateTime } from "@/lib/format";
 import { cancelRunAction, startAllocationAction } from "@/app/actions/exam";
 import type { AllocationRun, Strategy } from "@/lib/api/types";
 
 const STRATEGIES: { value: Strategy; label: string; hint: string }[] = [
-  { value: "Strict", label: "Strict", hint: "repair + random kicks" },
-  { value: "Balanced", label: "Balanced", hint: "DSATUR ordering" },
-  { value: "Greedy", label: "Greedy", hint: "naive baseline" }
+  { value: "Strict", label: "Strict", hint: "Tries hardest. Repairs conflicts and keeps retrying — use this one." },
+  { value: "Balanced", label: "Balanced", hint: "Fast and tidy. Good for a first pass on a large exam." },
+  { value: "Greedy", label: "Greedy", hint: "Fastest, no repair. Useful for comparing against the others." }
 ];
 
 export function AllocationPanel({
@@ -138,24 +138,65 @@ export function AllocationPanel({
       ) : null}
 
       <div className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-4 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">
-        <div className="label-mono mb-2.5">Start a run</div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Select value={strategy} onChange={(event) => setStrategy(event.target.value as Strategy)} width="auto" className="min-w-[190px]">
-            {STRATEGIES.map((entry) => (
-              <option key={entry.value} value={entry.value}>
-                {entry.label} — {entry.hint}
-              </option>
-            ))}
-          </Select>
-          <Button variant="primary" onClick={start} loading={pending || isWorking} disabled={!canAllocate || isWorking} icon={<LuPlay />}>
-            Run allocation
-          </Button>
-          {isWorking ? (
-            <Button variant="ghost" onClick={cancel} disabled={pending} icon={<LuBan />}>
-              Cancel
-            </Button>
-          ) : null}
+        <div className="mb-1 flex items-baseline gap-2">
+          <h3 className="text-[13.5px] font-semibold">Run allocation</h3>
+          <span className="text-[11.5px] text-ink-3">Places every candidate into a seat.</span>
         </div>
+
+        <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Allocation strategy">
+          {STRATEGIES.map((entry) => {
+            const selected = strategy === entry.value;
+
+            return (
+              <button
+                key={entry.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setStrategy(entry.value)}
+                disabled={!canAllocate || isWorking}
+                className={cn(
+                  "flex items-start gap-3 rounded-[var(--radius-ctl)] px-3.5 py-2.5 text-left transition-[background,box-shadow] duration-150",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  selected
+                    ? "bg-white/[0.10] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.30)]"
+                    : "bg-white/[0.03] shadow-[inset_0_0_0_1px_var(--edge)] hover:bg-white/[0.06]"
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "mt-[3px] grid size-3.5 shrink-0 place-items-center rounded-full transition-colors",
+                    selected ? "bg-ink" : "shadow-[inset_0_0_0_1px_oklch(100%_0_0/.35)]"
+                  )}
+                >
+                  {selected ? <span className="size-1.5 rounded-full bg-[oklch(18%_0_0)]" /> : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[13px] font-medium">{entry.label}</span>
+                  <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-3">{entry.hint}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <Button
+          variant="primary"
+          onClick={start}
+          loading={pending || isWorking}
+          disabled={!canAllocate || isWorking || candidateCount === 0 || hallCount === 0}
+          icon={<LuPlay />}
+          className="mt-3.5 w-full"
+        >
+          {isWorking ? "Allocating…" : "Run allocation"}
+        </Button>
+
+        {isWorking ? (
+          <Button variant="ghost" onClick={cancel} disabled={pending} icon={<LuBan />} className="mt-2 w-full">
+            Cancel run
+          </Button>
+        ) : null}
 
         {!canAllocate ? (
           <p className="mt-2.5 text-[11.5px] text-ink-3">
