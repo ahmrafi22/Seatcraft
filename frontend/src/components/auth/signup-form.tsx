@@ -16,7 +16,7 @@ export function SignupForm() {
 
   return (
     <form
-      action="/api/signup"
+      action="/bff/signup"
       method="post"
       onSubmit={() => setPending(true)}
       className="flex flex-col gap-3.5"

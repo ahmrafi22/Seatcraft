@@ -7,6 +7,9 @@ import type { AllocationRun } from "@/lib/api/types";
 /**
  * Polling endpoint for the allocation progress bar. The browser never sees the
  * bearer token — this handler attaches it server-side.
+ *
+ * Lives under /bff rather than /api: nginx routes every /api/* request to the
+ * .NET service, so a Next handler there is never reached in production.
  */
 export async function GET(
   _request: Request,

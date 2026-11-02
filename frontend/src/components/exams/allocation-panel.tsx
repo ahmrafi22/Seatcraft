@@ -42,7 +42,7 @@ export function AllocationPanel({
   const poll = useCallback(async () => {
     if (!activeRunId) return;
 
-    const response = await fetch(`/api/runs/${examId}/${activeRunId}`, { cache: "no-store" });
+    const response = await fetch(`/bff/runs/${examId}/${activeRunId}`, { cache: "no-store" });
 
     if (!response.ok) return;
 
