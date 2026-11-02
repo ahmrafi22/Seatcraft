@@ -69,9 +69,12 @@ export async function createExamWithDataAction(
   const rows = clamp(Number(formData.get("rows") ?? 10), 1, 100);
   const columns = clamp(Number(formData.get("columns") ?? 10), 1, 100);
   const candidateCount = clamp(Number(formData.get("candidateCount") ?? 0), 0, 5000);
-  const collegeCount = clamp(Number(formData.get("collegeCount") ?? 1), 1, 100);
+  const collegeIds = formData.getAll("collegeIds").map(String).filter(Boolean);
 
   if (!title) return { ok: false, message: "Give the exam a title." };
+  if (candidateCount > 0 && collegeIds.length === 0) {
+    return { ok: false, message: "Pick at least one college for the candidates." };
+  }
 
   try {
     const exam = await api<Exam>("/exams", {
@@ -91,7 +94,21 @@ export async function createExamWithDataAction(
     if (hallCount > 0) notes.push(`${hallCount} hall${hallCount === 1 ? "" : "s"}`);
 
     if (candidateCount > 0) {
-      const codes = await ensureColleges(collegeCount);
+      // The importer matches on institution code, so resolve the picked ids.
+      const all = await api<Institution[]>("/institutions").catch(() => [] as Institution[]);
+      const codes = collegeIds
+        .map((id) => all.find((institution) => institution.id === id)?.code)
+        .filter((code): code is string => Boolean(code));
+
+      if (codes.length === 0) {
+        revalidatePath("/exams");
+        return {
+          ok: false,
+          examId: exam.id,
+          message: `Created "${exam.title}", but the selected colleges could not be resolved. Add candidates manually.`
+        };
+      }
+
       const csv = buildCandidateCsv(candidateCount, codes);
 
       const body = new FormData();
@@ -121,39 +138,9 @@ export async function createExamWithDataAction(
 }
 
 /**
- * Returns `count` institution codes, reusing ones already on the tenant before
- * creating new ones. Codes are what the CSV import matches on, so they have to
- * come back exactly as stored.
+ * Builds the CSV the import endpoint expects, cycling the chosen colleges so the
+ * spread looks realistic. Codes (not ids) are what the importer matches on.
  */
-async function ensureColleges(count: number): Promise<string[]> {
-  const existing = await api<Institution[]>("/institutions").catch(() => [] as Institution[]);
-  const codes = existing.slice(0, count).map((institution) => institution.code);
-  const taken = new Set(existing.map((institution) => institution.code.toUpperCase()));
-
-  let next = 1;
-
-  while (codes.length < count) {
-    let code = `C${String(next).padStart(2, "0")}`;
-
-    while (taken.has(code)) {
-      next += 1;
-      code = `C${String(next).padStart(2, "0")}`;
-    }
-
-    await api("/institutions", {
-      method: "POST",
-      body: { name: `College ${String(next).padStart(2, "0")}`, code }
-    });
-
-    taken.add(code);
-    codes.push(code);
-    next += 1;
-  }
-
-  return codes;
-}
-
-/** Same column order the import endpoint expects. */
 function buildCandidateCsv(count: number, codes: string[]): string {
   const groups = ["Science", "Commerce", "Arts"];
   const lines = ["roll,name,institutionCode,subjectGroup,dateOfBirth"];
@@ -161,9 +148,9 @@ function buildCandidateCsv(count: number, codes: string[]): string {
   for (let index = 0; index < count; index += 1) {
     const roll = `R${String(index + 1).padStart(5, "0")}`;
     const name = `Candidate ${String(index + 1).padStart(4, "0")}`;
-    const code = codes[index % codes.length] ?? "C01";
     const group = groups[index % groups.length] ?? "Science";
     const dob = `2000-${String((index % 12) + 1).padStart(2, "0")}-${String((index % 28) + 1).padStart(2, "0")}`;
+    const code = codes[index % codes.length] ?? "";
 
     lines.push(`${roll},${name},${code},${group},${dob}`);
   }
@@ -218,10 +205,48 @@ export async function createInstitutionAction(_prev: ActionResult | null, formDa
   try {
     await api("/institutions", { method: "POST", body: { name, code } });
 
+    revalidatePath("/colleges");
     revalidatePath("/exams");
     return { ok: true, message: `Added ${name}.` };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the college." };
+  }
+}
+
+export async function updateInstitutionAction(
+  institutionId: string,
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  await requireSession();
+
+  const name = String(formData.get("name") ?? "").trim();
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+
+  if (!name || !code) return { ok: false, message: "Both the name and the code are required." };
+
+  try {
+    await api(`/institutions/${institutionId}`, { method: "PUT", body: { name, code } });
+
+    revalidatePath("/colleges");
+    revalidatePath("/exams");
+    return { ok: true, message: `Saved ${name}.` };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not save the college." };
+  }
+}
+
+export async function deleteInstitutionAction(institutionId: string): Promise<ActionResult> {
+  await requireSession();
+
+  try {
+    await api(`/institutions/${institutionId}`, { method: "DELETE" });
+
+    revalidatePath("/colleges");
+    revalidatePath("/exams");
+    return { ok: true, message: "College deleted." };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not delete the college." };
   }
 }
 

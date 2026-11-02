@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LuLayoutDashboard, LuListChecks, LuSearch, LuArmchair } from "react-icons/lu";
+import { LuLayoutDashboard, LuListChecks, LuSearch, LuArmchair, LuBuilding2 } from "react-icons/lu";
 
 import { cn } from "@/lib/cn";
 
 const NAV = [
   { href: "/", label: "Dashboard", Icon: LuLayoutDashboard },
   { href: "/exams", label: "Exams", Icon: LuListChecks },
+  { href: "/colleges", label: "Colleges", Icon: LuBuilding2 },
   { href: "/lookup", label: "Lookup", Icon: LuSearch }
 ] as const;
 

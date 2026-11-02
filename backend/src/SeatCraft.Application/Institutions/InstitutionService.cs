@@ -30,6 +30,22 @@ public sealed class InstitutionService(ISeatCraftData data, IUnitOfWork unitOfWo
         return ToDto(institution);
     }
 
+    public async Task<InstitutionDto> UpdateAsync(Guid id, UpdateInstitutionRequest request, CancellationToken cancellationToken = default)
+    {
+        var institution = await data.Institutions.FindAsync(id, cancellationToken)
+            ?? throw new NotFoundException($"Institution {id} was not found.");
+
+        var code = request.Code.Trim().ToUpperInvariant();
+
+        if (data.Institutions.Query().Any(other => other.Code == code && other.Id != id))
+            throw new ConflictException($"Institution code '{code}' already exists.");
+
+        institution.Update(request.Name, code);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ToDto(institution);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var institution = await data.Institutions.FindAsync(id, cancellationToken)

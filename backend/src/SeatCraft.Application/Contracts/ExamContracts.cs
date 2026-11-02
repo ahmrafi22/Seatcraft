@@ -27,6 +27,8 @@ public sealed record InstitutionDto(Guid Id, string Name, string Code, int Candi
 
 public sealed record CreateInstitutionRequest(string Name, string Code);
 
+public sealed record UpdateInstitutionRequest(string Name, string Code);
+
 public sealed record HallDto(
     Guid Id,
     string Name,

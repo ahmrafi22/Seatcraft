@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LuLayoutDashboard, LuListChecks, LuSearch, LuLogOut } from "react-icons/lu";
+import { LuLayoutDashboard, LuListChecks, LuSearch, LuLogOut, LuBuilding2 } from "react-icons/lu";
 
 import { cn } from "@/lib/cn";
 import { logoutAction } from "@/app/actions/auth";
@@ -11,6 +11,7 @@ import type { Session } from "@/lib/api/types";
 const NAV = [
   { href: "/", label: "Dashboard", Icon: LuLayoutDashboard },
   { href: "/exams", label: "Exams", Icon: LuListChecks },
+  { href: "/colleges", label: "Colleges", Icon: LuBuilding2 },
   { href: "/lookup", label: "Seat lookup", Icon: LuSearch }
 ] as const;
 

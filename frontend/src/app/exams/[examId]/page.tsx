@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LuArrowRight, LuArmchair } from "react-icons/lu";
+import { LuArrowRight, LuArmchair, LuBuilding2 } from "react-icons/lu";
 
 import { Topbar } from "@/components/shell/topbar";
 import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
@@ -10,7 +10,6 @@ import { Reveal } from "@/components/motion/reveal";
 import { AllocationPanel } from "@/components/exams/allocation-panel";
 import { ConstraintEditor } from "@/components/exams/constraint-editor";
 import { AddHallForm } from "@/components/exams/add-hall-form";
-import { AddInstitutionForm } from "@/components/exams/add-institution-form";
 import { AddCandidateForm } from "@/components/exams/add-candidate-form";
 import { ImportCandidatesForm } from "@/components/exams/import-candidates-form";
 import { DownloadCsvTemplate } from "@/components/exams/download-csv-template";
@@ -259,9 +258,14 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
 
             <Reveal delay={0.16}>
               <Pane>
-                <PaneHead title="Colleges" hint="shared across exams" />
+                <PaneHead title="Colleges" hint={`${institutions.length}`} />
                 <PaneBody>
-                  <AddInstitutionForm />
+                  <p className="text-[13px] text-ink-2">
+                    Candidates pick a college when you add them. Manage the list on the colleges page.
+                  </p>
+                  <ButtonLink href="/colleges" variant="default" className="mt-3 w-full" icon={<LuBuilding2 />}>
+                    Manage colleges
+                  </ButtonLink>
                 </PaneBody>
               </Pane>
             </Reveal>

@@ -17,6 +17,13 @@ public sealed class InstitutionsController(InstitutionService institutionService
     public async Task<IActionResult> Create([FromBody] CreateInstitutionRequest request, CancellationToken cancellationToken) =>
         OkJson(await institutionService.CreateAsync(request, cancellationToken));
 
+    [HttpPut("{institutionId:guid}")]
+    public async Task<IActionResult> Update(
+        Guid institutionId,
+        [FromBody] UpdateInstitutionRequest request,
+        CancellationToken cancellationToken) =>
+        OkJson(await institutionService.UpdateAsync(institutionId, request, cancellationToken));
+
     [HttpDelete("{institutionId:guid}")]
     public async Task<IActionResult> Delete(Guid institutionId, CancellationToken cancellationToken)
     {

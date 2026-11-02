@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { LuArrowRight, LuListChecks } from "react-icons/lu";
+import { LuArrowRight, LuListChecks, LuBuilding2 } from "react-icons/lu";
 
 import { Topbar } from "@/components/shell/topbar";
 import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
@@ -9,20 +9,26 @@ import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { CreateExamDialog } from "@/components/exams/create-exam-dialog";
 import { SeedDemoForm } from "@/components/exams/seed-demo-form";
-import { AddInstitutionForm } from "@/components/exams/add-institution-form";
 import { api } from "@/lib/api/client";
 import { getSession } from "@/lib/session";
 import { isDemoSeedEnabled } from "@/lib/demo";
 import { shortDate } from "@/lib/format";
-import type { Exam } from "@/lib/api/types";
+import type { Exam, Institution } from "@/lib/api/types";
 
 export const metadata: Metadata = { title: "Exams" };
 export const dynamic = "force-dynamic";
 
 export default async function ExamsPage() {
   const session = await getSession();
-  const exams = session ? await api<Exam[]>("/exams").catch(() => [] as Exam[]) : [];
+  const [exams, institutions] = session
+    ? await Promise.all([
+        api<Exam[]>("/exams").catch(() => [] as Exam[]),
+        api<Institution[]>("/institutions").catch(() => [] as Institution[])
+      ])
+    : [[] as Exam[], [] as Institution[]];
+
   const seedEnabled = isDemoSeedEnabled();
+  const institutionCount = institutions.length;
 
   return (
     <>
@@ -42,7 +48,7 @@ export default async function ExamsPage() {
             <ButtonLink href="/lookup" variant="ghost" size="md">
               Public lookup
             </ButtonLink>
-            <CreateExamDialog />
+            <CreateExamDialog institutions={institutions} />
           </div>
         </div>
 
@@ -112,9 +118,14 @@ export default async function ExamsPage() {
           <div className="flex flex-col gap-4">
             <Reveal delay={0.06}>
               <Pane>
-                <PaneHead title="New college" hint="shared across exams" />
+                <PaneHead title="Colleges" hint={`${institutionCount}`} />
                 <PaneBody>
-                  <AddInstitutionForm />
+                  <p className="text-[13px] text-ink-2">
+                    Every candidate belongs to a college. Add, rename or remove them on the colleges page.
+                  </p>
+                  <ButtonLink href="/colleges" variant="default" className="mt-3 w-full" icon={<LuBuilding2 />}>
+                    Manage colleges
+                  </ButtonLink>
                 </PaneBody>
               </Pane>
             </Reveal>

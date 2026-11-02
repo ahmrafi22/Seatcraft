@@ -2,26 +2,34 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { LuPlus } from "react-icons/lu";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, Input, Textarea } from "@/components/ui/field";
+import { cn } from "@/lib/cn";
 import { createExamWithDataAction, type CreateExamWizardResult } from "@/app/actions/exam";
+import type { Institution } from "@/lib/api/types";
 
 /**
  * One dialog for the whole "new exam" flow: the exam itself plus the starter
  * data that allocation needs. The separate halls / candidates / CSV panes on
  * the exam page remain, for filling in an exam that already exists.
  */
-export function CreateExamDialog() {
+export function CreateExamDialog({ institutions = [] }: { institutions?: Institution[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>(institutions.map((entry) => entry.id));
   const [state, formAction, pending] = useActionState<CreateExamWizardResult | null, FormData>(
     createExamWithDataAction,
     null
   );
+
+  function toggle(id: string) {
+    setSelected((current) => (current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]));
+  }
 
   // The action returns the new exam id; jump straight into it so the next step
   // (running the allocation) is one click away. Navigating unmounts this dialog,
@@ -73,17 +81,69 @@ export function CreateExamDialog() {
           </div>
 
           <div className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-3.5 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">
+            <div className="label-mono mb-2.5">Colleges</div>
+
+            {institutions.length === 0 ? (
+              <p className="text-[12.5px] text-ink-3">
+                No colleges yet.{" "}
+                <Link href="/colleges" className="text-ink underline underline-offset-2" onClick={() => setOpen(false)}>
+                  Add one first
+                </Link>
+                .
+              </p>
+            ) : (
+              <>
+                <div className="flex max-h-[168px] flex-col gap-1.5 overflow-y-auto pr-1">
+                  {institutions.map((institution) => {
+                    const checked = selected.includes(institution.id);
+
+                    return (
+                      <label
+                        key={institution.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[12.5px] transition-colors",
+                          checked
+                            ? "bg-white/[0.09] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.22)]"
+                            : "bg-white/[0.02] shadow-[inset_0_0_0_1px_var(--edge)] hover:bg-white/[0.05]"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          name="collegeIds"
+                          value={institution.id}
+                          checked={checked}
+                          onChange={() => toggle(institution.id)}
+                          className="size-3.5 shrink-0 accent-[oklch(96%_0_0)]"
+                        />
+                        <span className="min-w-0 flex-1 truncate font-medium">{institution.name}</span>
+                        <span className="shrink-0 font-mono text-[11px] text-ink-3">{institution.code}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="text-[11.5px] text-ink-3">
+                    {selected.length} of {institutions.length} selected
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(selected.length === institutions.length ? [] : institutions.map((entry) => entry.id))}
+                    className="text-[11.5px] text-ink-2 underline underline-offset-2 hover:text-ink"
+                  >
+                    {selected.length === institutions.length ? "Clear all" : "Select all"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="rounded-[var(--radius-ctl)] bg-white/[0.04] p-3.5 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_var(--edge)]">
             <div className="label-mono mb-2.5">Candidates</div>
-            <div className="grid grid-cols-2 gap-2.5">
-              <Field label="How many" htmlFor="wiz-candidates">
-                <Input id="wiz-candidates" name="candidateCount" type="number" defaultValue={0} min={0} max={5000} />
-              </Field>
-              <Field label="Colleges" htmlFor="wiz-colleges" hint="Reuses existing first.">
-                <Input id="wiz-colleges" name="collegeCount" type="number" defaultValue={3} min={1} max={100} />
-              </Field>
-            </div>
+            <Field label="How many" htmlFor="wiz-candidates" hint="Placeholder names, spread across the colleges you picked.">
+              <Input id="wiz-candidates" name="candidateCount" type="number" defaultValue={0} min={0} max={5000} />
+            </Field>
             <p className="mt-2 text-[11.5px] text-ink-3">
-              Placeholder candidates are generated so you can allocate immediately. Leave at 0 to import your own CSV instead.
+              Leave at 0 to import your own CSV instead.
             </p>
           </div>
 
