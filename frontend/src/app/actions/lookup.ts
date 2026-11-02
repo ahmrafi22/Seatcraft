@@ -14,13 +14,14 @@ export interface LookupState {
 
 /**
  * Behind a proxy (nginx, Vercel) the API only sees the web tier's address, so every
- * visitor would share one rate-limit bucket. Forward the real client address as a
- * single-entry header — a chain would leave the proxy's own address as the last hop.
+ * visitor would share one rate-limit bucket. Forward the real client address, but take
+ * it from `x-real-ip` (a proxy overwrites that) or the *last* forwarded hop — the first
+ * entry of `x-forwarded-for` is whatever the visitor sent and cannot be trusted.
  */
 async function clientAddressHeader(): Promise<Record<string, string>> {
   const store = await headers();
-  const forwarded = store.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const address = forwarded || store.get("x-real-ip")?.trim();
+  const forwarded = store.get("x-forwarded-for")?.split(",").at(-1)?.trim();
+  const address = store.get("x-real-ip")?.trim() || forwarded;
 
   return address ? { "X-Forwarded-For": address } : {};
 }
