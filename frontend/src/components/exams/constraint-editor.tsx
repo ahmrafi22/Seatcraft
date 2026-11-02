@@ -68,7 +68,7 @@ export function ConstraintEditor({ examId, constraints }: { examId: string; cons
       ))}
 
       {error ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 flex items-center gap-2 text-[12.5px] text-rose">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 flex items-center gap-2 text-[12.5px] text-danger">
           <LuTriangleAlert className="size-3.5" />
           {error}
         </motion.div>

@@ -126,9 +126,9 @@ export function PlannerShell({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
-        <SummaryTile label="Assigned" value={assigned} suffix={`/ ${exam.candidateCount}`} foot={`${percent(assigned, exam.candidateCount)}% placed`} accent="var(--color-cyan)" />
-        <SummaryTile label="Usable seats" value={usable} foot={`${Math.max(0, usable - assigned)} spare`} accent="var(--color-indigo)" />
-        <SummaryTile label="Violations" value={plan.violations.length} foot={`${blocking.length} blocking`} accent={blocking.length === 0 ? "var(--color-emerald)" : "var(--color-rose)"} />
+        <SummaryTile label="Assigned" value={assigned} suffix={`/ ${exam.candidateCount}`} foot={`${percent(assigned, exam.candidateCount)}% placed`} accent="var(--color-sky)" />
+        <SummaryTile label="Usable seats" value={usable} foot={`${Math.max(0, usable - assigned)} spare`} accent="var(--color-sky)" />
+        <SummaryTile label="Violations" value={plan.violations.length} foot={`${blocking.length} blocking`} accent={blocking.length === 0 ? "var(--color-emerald)" : "var(--color-danger)"} />
         <div className="glass-pane flex flex-col justify-center rounded-[var(--radius-pane)] px-[18px] py-[17px]">
           <div className="label-mono">Plan status</div>
           <div className="mt-2.5">
@@ -201,7 +201,7 @@ export function PlannerShell({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-x-4.5 gap-y-2.5 text-[12.5px] text-ink-2">
-              <LegendSwatch style={{ background: "var(--color-violet)" }} label="Seat taken" />
+              <LegendSwatch style={{ background: "var(--color-teal)" }} label="Seat taken" />
               <LegendSwatch style={{ background: "oklch(100% 0 0 / .08)" }} label="Empty" />
               <LegendSwatch
                 style={{
@@ -210,7 +210,7 @@ export function PlannerShell({
                 }}
                 label="Blocked"
               />
-              <LegendSwatch style={{ background: "var(--color-rose)" }} label="Violation" />
+              <LegendSwatch style={{ background: "var(--color-danger)" }} label="Violation" />
               <span className="ml-auto font-mono text-[11px] text-ink-3">
                 {locked ? "read-only" : "drag a seat onto another to swap"}
               </span>

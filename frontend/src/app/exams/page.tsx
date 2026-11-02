@@ -89,7 +89,7 @@ export default async function ExamsPage() {
                           <td className="px-4 py-3 text-right">
                             <Link
                               href={`/exams/${exam.id}`}
-                              className="inline-flex items-center gap-1 text-[12.5px] font-medium text-cyan hover:underline hover:underline-offset-2"
+                              className="inline-flex items-center gap-1 text-[12.5px] font-medium text-sky hover:underline hover:underline-offset-2"
                             >
                               Open <LuArrowRight className="size-3" />
                             </Link>

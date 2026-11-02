@@ -22,7 +22,7 @@ export function MiniHall({
   const cells = Array.from({ length: rows * columns }, (_, index) => {
     const mixed = (index * 37 + seed * 11) % 100;
     const taken = mixed % 7 !== 0;
-    const hue = [298, 205, 162, 82, 348, 258][mixed % 6] ?? 298;
+    const hue = [192, 232, 162, 205, 186, 250][mixed % 6] ?? 192;
 
     return { taken, hue, index };
   });

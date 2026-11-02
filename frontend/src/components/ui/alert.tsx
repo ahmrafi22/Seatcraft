@@ -5,10 +5,10 @@ import { cn } from "@/lib/cn";
 type Tone = "info" | "success" | "warning" | "danger";
 
 const TONES: Record<Tone, string> = {
-  info: "bg-[oklch(72%_.19_298/.10)] text-[oklch(88%_.07_300)] shadow-[inset_0_0_0_1px_oklch(72%_.19_298/.3)]",
+  info: "bg-[oklch(75%_.145_192/.12)] text-[oklch(90%_.07_195)] shadow-[inset_0_0_0_1px_oklch(75%_.145_192/.32)]",
   success: "bg-[oklch(80%_.17_160/.10)] text-[oklch(88%_.11_162)] shadow-[inset_0_0_0_1px_oklch(80%_.17_160/.3)]",
   warning: "bg-[oklch(85%_.16_82/.10)] text-[oklch(92%_.10_85)] shadow-[inset_0_0_0_1px_oklch(85%_.16_82/.3)]",
-  danger: "bg-[oklch(72%_.20_22/.12)] text-[oklch(88%_.09_20)] shadow-[inset_0_0_0_1px_oklch(72%_.20_22/.34)]"
+  danger: "bg-[oklch(69%_.20_27/.14)] text-[oklch(88%_.10_30)] shadow-[inset_0_0_0_1px_oklch(69%_.20_27/.36)]"
 };
 
 export function Alert({

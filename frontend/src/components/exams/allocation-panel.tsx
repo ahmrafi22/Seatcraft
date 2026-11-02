@@ -171,11 +171,11 @@ export function AllocationPanel({
               className="overflow-hidden"
             >
               <div className="mt-3.5 flex items-center gap-2 text-[12.5px] text-ink-2">
-                <LuLoaderCircle className="size-3.5 animate-spin text-violet" />
+                <LuLoaderCircle className="size-3.5 animate-spin text-teal" />
                 <span className="font-medium">{activeRun.currentPhase ?? activeRun.status}</span>
                 <span className="ml-auto font-mono text-[11.5px] text-ink-3">{activeRun.progressPercent}%</span>
               </div>
-              <Progress value={activeRun.progressPercent} accent="var(--color-violet)" className="mt-2" />
+              <Progress value={activeRun.progressPercent} accent="var(--color-teal)" className="mt-2" />
             </motion.div>
           ) : null}
         </AnimatePresence>
@@ -204,7 +204,7 @@ export function AllocationPanel({
                 <span className="flex-1" />
                 <span
                   className="font-mono text-[12px] tabular-nums"
-                  style={{ color: run.bestViolationCount === 0 ? "var(--color-emerald)" : "var(--color-rose)" }}
+                  style={{ color: run.bestViolationCount === 0 ? "var(--color-emerald)" : "var(--color-danger)" }}
                 >
                   {run.bestViolationCount} violation{run.bestViolationCount === 1 ? "" : "s"}
                 </span>

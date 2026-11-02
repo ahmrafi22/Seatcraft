@@ -65,7 +65,7 @@ export function LookupForm({ defaultTenant }: { defaultTenant: string }) {
 
               <div className="p-5">
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[linear-gradient(140deg,oklch(84%_.12_300),oklch(86%_.11_200))] text-[15px] font-semibold text-[oklch(18%_.06_298)] shadow-[inset_0_1px_0_oklch(100%_0_0/.7),0_0_0_1px_oklch(100%_0_0/.18)]">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[linear-gradient(140deg,oklch(84%_.09_195),oklch(86%_.1_225))] text-[15px] font-semibold text-[oklch(20%_.05_210)] shadow-[inset_0_1px_0_oklch(100%_0_0/.7),0_0_0_1px_oklch(100%_0_0/.18)]">
                     {initialsOf(state.seat.candidateName)}
                   </span>
                   <div className="min-w-0">
@@ -74,17 +74,17 @@ export function LookupForm({ defaultTenant }: { defaultTenant: string }) {
                   </div>
                 </div>
 
-                <div className="relative grid place-items-center overflow-hidden rounded-[var(--radius-ctl)] bg-[linear-gradient(135deg,oklch(72%_.19_298/.18),oklch(74%_.17_205/.10))] px-5 py-8 shadow-[inset_0_1px_0_oklch(100%_0_0/.2),0_0_0_1px_oklch(100%_0_0/.1)]">
+                <div className="relative grid place-items-center overflow-hidden rounded-[var(--radius-ctl)] bg-[linear-gradient(135deg,oklch(75%_.145_192/.18),oklch(77%_.13_232/.10))] px-5 py-8 shadow-[inset_0_1px_0_oklch(100%_0_0/.2),0_0_0_1px_oklch(100%_0_0/.1)]">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-70"
                     style={{
-                      background: `radial-gradient(18rem 12rem at 50% 120%, oklch(74% .17 ${hueFor(state.seat.hallName)} / .45), transparent 70%)`
+                      background: `radial-gradient(18rem 12rem at 50% 120%, oklch(74% .15 ${hueFor(state.seat.hallName)} / .45), transparent 70%)`
                     }}
                   />
                   <div className="relative grid place-items-center">
                     <div className="label-mono text-white/60">{state.seat.hallName}</div>
-                    <div className="mt-1 bg-[linear-gradient(100deg,oklch(94%_.09_300),oklch(90%_.11_200))] bg-clip-text font-mono text-[36px] font-semibold tracking-[-0.03em] text-transparent">
+                    <div className="mt-1 bg-[linear-gradient(100deg,oklch(94%_.08_192),oklch(90%_.1_228))] bg-clip-text font-mono text-[36px] font-semibold tracking-[-0.03em] text-transparent">
                       {state.seat.seatLabel}
                     </div>
                   </div>

@@ -102,14 +102,14 @@ export default async function DashboardPage() {
               label="Candidates"
               value={active?.candidateCount.toLocaleString() ?? "—"}
               foot={active ? `for ${active.title}` : "no exam yet"}
-              accent="var(--color-violet)"
+              accent="var(--color-teal)"
             />
             <Stat
               label="Seats assigned"
               value={assigned.toLocaleString()}
               suffix={active ? `/ ${usableSeats.toLocaleString()}` : undefined}
               foot={active ? `${percent(assigned, usableSeats)}% placed` : "run an allocation"}
-              accent="var(--color-cyan)"
+              accent="var(--color-sky)"
             />
             <Stat
               label="Halls"
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
               label="Blocking violations"
               value={blocking}
               foot={blocking === 0 ? "plan is publishable" : "resolve before publishing"}
-              accent={blocking === 0 ? "var(--color-emerald)" : "var(--color-rose)"}
+              accent={blocking === 0 ? "var(--color-emerald)" : "var(--color-danger)"}
             />
           </div>
         </Reveal>
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                               </td>
                               <td
                                 className="px-4 py-3 font-mono tabular-nums"
-                                style={{ color: run.bestViolationCount === 0 ? "var(--color-emerald)" : "var(--color-rose)" }}
+                                style={{ color: run.bestViolationCount === 0 ? "var(--color-emerald)" : "var(--color-danger)" }}
                               >
                                 {run.bestViolationCount}
                               </td>

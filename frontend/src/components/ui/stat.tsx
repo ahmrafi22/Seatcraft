@@ -10,7 +10,7 @@ export function Stat({
   label,
   value,
   foot,
-  accent = "var(--color-violet)",
+  accent = "var(--color-teal)",
   className,
   suffix
 }: {

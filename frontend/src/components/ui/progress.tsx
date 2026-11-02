@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-export function Progress({ value, accent = "var(--color-violet)", className }: { value: number; accent?: string; className?: string }) {
+export function Progress({ value, accent = "var(--color-teal)", className }: { value: number; accent?: string; className?: string }) {
   const width = Math.max(0, Math.min(100, value));
 
   return (

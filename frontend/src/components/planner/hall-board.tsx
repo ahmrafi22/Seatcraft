@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
@@ -90,7 +90,7 @@ export function HallBoard({
           return (
             <div
               key={cellKey}
-              title={`Blocked Â· ${seatLabel(seat.row, seat.column)}`}
+              title={`Blocked · ${seatLabel(seat.row, seat.column)}`}
               className="aspect-square cursor-not-allowed rounded-[7px] bg-[repeating-linear-gradient(45deg,oklch(100%_0_0/.03),oklch(100%_0_0/.03)_5px,oklch(100%_0_0/.07)_5px,oklch(100%_0_0/.07)_10px)] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.05)]"
             />
           );
@@ -100,7 +100,7 @@ export function HallBoard({
           return (
             <div
               key={cellKey}
-              title={`Empty Â· ${seatLabel(seat.row, seat.column)}`}
+              title={`Empty · ${seatLabel(seat.row, seat.column)}`}
               onDragOver={(event) => {
                 if (!dragFrom || disabled) return;
                 event.preventDefault();
@@ -116,7 +116,7 @@ export function HallBoard({
               }}
               className={cn(
                 "aspect-square rounded-[7px] bg-white/[0.025] shadow-[inset_0_0_0_1px_oklch(100%_0_0/.06)] transition-shadow",
-                isHover && "shadow-[0_0_0_2px_var(--color-cyan),0_0_18px_oklch(82%_.14_205/.45)]"
+                isHover && "shadow-[0_0_0_2px_var(--color-sky),0_0_18px_oklch(82%_.14_205/.45)]"
               )}
             />
           );
@@ -129,7 +129,7 @@ export function HallBoard({
             layout
             draggable={!disabled}
             disabled={disabled}
-            title={`${assignment.roll} Â· ${assignment.fullName}\n${assignment.institutionName}\nSeat ${seatLabel(seat.row, seat.column)}`}
+            title={`${assignment.roll} · ${assignment.fullName}\n${assignment.institutionName}\nSeat ${seatLabel(seat.row, seat.column)}`}
             onDragStart={() => setDragFrom(assignment)}
             onDragEnd={() => {
               setDragFrom(null);
@@ -155,15 +155,15 @@ export function HallBoard({
               "transition-[transform,box-shadow,opacity] duration-150 ease-[var(--ease-out-soft)]",
               "hover:z-10 hover:-translate-y-0.5 disabled:cursor-default",
               isDragging && "opacity-30",
-              isHover && "shadow-[0_0_0_2px_var(--color-cyan),0_0_20px_oklch(82%_.14_205/.5)]",
+              isHover && "shadow-[0_0_0_2px_var(--color-sky),0_0_20px_oklch(82%_.14_205/.5)]",
               isSelected && "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent"
             )}
             style={{
-              background: `color-mix(in oklch, oklch(72% .18 ${hue}) 22%, transparent)`,
-              color: `color-mix(in oklch, oklch(72% .18 ${hue}) 45%, white)`,
+              background: `color-mix(in oklch, oklch(80% .17 ${hue}) 30%, transparent)`,
+              color: `color-mix(in oklch, oklch(88% .13 ${hue}) 70%, white)`,
               boxShadow: isFlagged
-                ? "inset 0 1px 0 oklch(100% 0 0 / .25), 0 0 0 1.5px oklch(72% .20 22), 0 0 16px oklch(72% .20 22 / .55)"
-                : `inset 0 1px 0 oklch(100% 0 0 / .20), 0 0 0 1px color-mix(in oklch, oklch(72% .18 ${hue}) 45%, transparent), 0 4px 12px -6px color-mix(in oklch, oklch(72% .18 ${hue}) 70%, transparent)`
+                ? "inset 0 1px 0 oklch(100% 0 0 / .25), 0 0 0 1.5px oklch(69% .20 27), 0 0 16px oklch(69% .20 27 / .55)"
+                : `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px color-mix(in oklch, oklch(82% .17 ${hue}) 58%, transparent), 0 4px 12px -6px color-mix(in oklch, oklch(80% .17 ${hue}) 75%, transparent)`
             }}
           >
             {assignment.roll.slice(-3)}

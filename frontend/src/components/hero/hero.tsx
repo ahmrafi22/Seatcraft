@@ -8,10 +8,10 @@ import type { Exam } from "@/lib/api/types";
 export function Hero({ exam }: { exam: Exam | null }) {
   return (
     <Reveal>
-      <section className="relative mb-4 grid items-center gap-7 overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,oklch(72%_.19_298/.16),oklch(74%_.17_205/.06)_45%,oklch(66%_.24_348/.12))] p-8 shadow-[inset_0_1px_0_oklch(100%_0_0/.22),0_0_0_1px_oklch(100%_0_0/.09),0_30px_60px_-40px_oklch(62%_.26_296/.9)] backdrop-blur-[26px] lg:grid-cols-[1.15fr_0.85fr]">
+      <section className="relative mb-4 grid items-center gap-7 overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,oklch(70%_.13_192/.18),oklch(74%_.12_225/.06)_45%,oklch(68%_.15_162/.13))] p-8 shadow-[inset_0_1px_0_oklch(100%_0_0/.22),0_0_0_1px_oklch(100%_0_0/.09),0_30px_60px_-40px_oklch(62%_.14_205/.9)] backdrop-blur-[26px] lg:grid-cols-[1.15fr_0.85fr]">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-[40%] -left-[20%] h-[130%] w-[70%] bg-[radial-gradient(closest-side,oklch(70%_.24_320/.30),transparent)] blur-[30px]"
+          className="pointer-events-none absolute -top-[40%] -left-[20%] h-[130%] w-[70%] bg-[radial-gradient(closest-side,oklch(70%_.14_196/.30),transparent)] blur-[30px]"
         />
 
         <div className="relative">
@@ -66,9 +66,9 @@ export function Hero({ exam }: { exam: Exam | null }) {
 
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { label: "Halls", value: exam ? String(exam.hallCount) : "—", hue: 205 },
+              { label: "Halls", value: exam ? String(exam.hallCount) : "—", hue: 232 },
               { label: "Candidates", value: exam ? exam.candidateCount.toLocaleString() : "—", hue: 162 },
-              { label: "Status", value: exam ? exam.status : "—", hue: 298 }
+              { label: "Status", value: exam ? exam.status : "—", hue: 192 }
             ].map((chip) => (
               <div
                 key={chip.label}

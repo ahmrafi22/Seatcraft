@@ -8,14 +8,14 @@ type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "text-white bg-[linear-gradient(140deg,oklch(62%_.25_296),oklch(64%_.24_330)_60%,oklch(70%_.19_8))] " +
-    "shadow-[inset_0_1px_0_oklch(100%_0_0/.45),inset_0_-1px_0_oklch(0%_0_0/.25),0_0_0_1px_oklch(100%_0_0/.12),0_10px_26px_-12px_oklch(64%_.25_300/.95)] " +
+    "text-white bg-[linear-gradient(140deg,oklch(60%_.13_196),oklch(64%_.13_222)_58%,oklch(68%_.16_166))] " +
+    "shadow-[inset_0_1px_0_oklch(100%_0_0/.45),inset_0_-1px_0_oklch(0%_0_0/.25),0_0_0_1px_oklch(100%_0_0/.12),0_10px_26px_-12px_oklch(62%_.15_205/.95)] " +
     "hover:brightness-110",
   default: "glass-ctl text-ink hover:bg-white/[0.12]",
   ghost: "text-ink-2 hover:bg-white/[0.07] hover:text-ink",
   danger:
-    "text-white bg-[linear-gradient(140deg,oklch(60%_.23_22),oklch(64%_.24_350))] " +
-    "shadow-[inset_0_1px_0_oklch(100%_0_0/.4),0_0_0_1px_oklch(100%_0_0/.1),0_10px_26px_-14px_oklch(62%_.24_22/.9)] " +
+    "text-white bg-[linear-gradient(140deg,oklch(58%_.21_25),oklch(63%_.2_42))] " +
+    "shadow-[inset_0_1px_0_oklch(100%_0_0/.4),0_0_0_1px_oklch(100%_0_0/.1),0_10px_26px_-14px_oklch(60%_.22_30/.9)] " +
     "hover:brightness-110"
 };
 
