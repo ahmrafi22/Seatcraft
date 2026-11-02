@@ -9,7 +9,7 @@ import { Field, Input } from "@/components/ui/field";
 import { loginAction } from "@/app/actions/auth";
 import type { ActionResult } from "@/app/actions/auth";
 
-export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
+export function LoginForm() {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(loginAction, null);
 
   return (
@@ -20,8 +20,7 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
           name="email"
           type="email"
           autoComplete="email"
-          defaultValue={defaultEmail}
-          placeholder="admin@demo.test"
+          placeholder="you@college.edu"
           required
         />
       </Field>

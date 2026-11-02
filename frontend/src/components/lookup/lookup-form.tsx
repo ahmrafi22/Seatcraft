@@ -8,7 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { lookupSeatAction, type LookupState } from "@/app/actions/lookup";
-import { stepFor } from "@/lib/colors";
+import { tintFor } from "@/lib/colors";
 
 const INITIAL: LookupState = { status: "idle" };
 
@@ -79,12 +79,17 @@ export function LookupForm({ defaultTenant }: { defaultTenant: string }) {
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-70"
                     style={{
-                      background: `radial-gradient(18rem 12rem at 50% 120%, oklch(${stepFor(state.seat.hallName)}% 0 0 / .35), transparent 70%)`
+                      background: `radial-gradient(18rem 12rem at 50% 120%, oklch(${tintFor(state.seat.hallName).lightness}% ${tintFor(state.seat.hallName).chroma} ${tintFor(state.seat.hallName).hue} / .35), transparent 70%)`
                     }}
                   />
                   <div className="relative grid place-items-center">
                     <div className="label-mono text-white/60">{state.seat.hallName}</div>
-                    <div className="mt-1 bg-[linear-gradient(100deg,oklch(99%_0_0),oklch(80%_0_0))] bg-clip-text font-mono text-[36px] font-semibold tracking-[-0.03em] text-transparent">
+                    <div
+                      className="mt-1 bg-clip-text font-mono text-[36px] font-semibold tracking-[-0.03em] text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(100deg, oklch(99% 0 0), oklch(${tintFor(state.seat.hallName).lightness + 12}% ${tintFor(state.seat.hallName).chroma} ${tintFor(state.seat.hallName).hue}))`
+                      }}
+                    >
                       {state.seat.seatLabel}
                     </div>
                   </div>

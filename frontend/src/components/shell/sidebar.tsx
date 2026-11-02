@@ -61,10 +61,6 @@ export function Sidebar({ session }: { session: Session | null }) {
       </nav>
 
       <div className="mt-auto flex flex-col gap-2.5 border-t border-white/[0.075] pt-3.5">
-        <div className="flex items-center gap-2 rounded-[var(--radius-ctl)] bg-white/[0.045] px-2.5 py-2 text-[11.5px] text-ink-2 shadow-[inset_0_1px_0_oklch(100%_0_0/.10),0_0_0_1px_var(--edge)]">
-          <span className="size-1.5 shrink-0 rounded-full bg-[oklch(96%_0_0)] shadow-[0_0_0_3px_oklch(100%_0_0/.12),0_0_10px_oklch(100%_0_0/.8)]" />
-          <span>Connected to API</span>
-        </div>
 
         {session ? (
           <div className="flex items-center gap-2.5 rounded-[var(--radius-ctl)] p-2 shadow-[inset_0_0_0_1px_var(--edge)]">

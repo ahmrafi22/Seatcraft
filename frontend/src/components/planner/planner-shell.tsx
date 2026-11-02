@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MetricBar } from "@/components/ui/progress";
 import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
 import { Select } from "@/components/ui/field";
-import { institutionColor, stepFor } from "@/lib/colors";
+import { institutionColor, seatFill, seatInk } from "@/lib/colors";
 import { percent, seatLabel } from "@/lib/format";
 import { swapSeatsAction, publishPlanAction, moveCandidateAction } from "@/app/actions/exam";
 import type { Exam, Hall, SeatAssignment, SeatPlanDetail } from "@/lib/api/types";
@@ -198,7 +198,7 @@ export function PlannerShell({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-x-4.5 gap-y-2.5 text-[12.5px] text-ink-2">
-              <LegendSwatch style={{ background: "oklch(78% 0 0)" }} label="Seat taken" />
+              <LegendSwatch style={{ background: "oklch(78% 0.055 205 / 0.5)" }} label="Seat taken" />
               <LegendSwatch style={{ background: "oklch(100% 0 0 / .08)" }} label="Empty" />
               <LegendSwatch
                 style={{
@@ -282,8 +282,8 @@ export function PlannerShell({
                     <span
                       className="grid size-9 shrink-0 place-items-center rounded-lg font-mono text-[12px] font-semibold"
                       style={{
-                        background: `oklch(${stepFor(selectedAssignment.institutionId)}% 0 0 / 0.26)`,
-                        color: `oklch(${Math.min(98, stepFor(selectedAssignment.institutionId) + 12)}% 0 0)`
+                        background: seatFill(selectedAssignment.institutionId),
+                        color: seatInk(selectedAssignment.institutionId)
                       }}
                     >
                       {selectedAssignment.roll.slice(-2)}

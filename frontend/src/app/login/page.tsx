@@ -7,12 +7,12 @@ import { Pane, PaneBody, PaneHead } from "@/components/ui/pane";
 import { Alert } from "@/components/ui/alert";
 import { LoginForm } from "@/components/auth/login-form";
 import { DemoLoginButton } from "@/components/auth/demo-login-button";
-import { DEMO_CREDENTIALS, isDemoLoginEnabled } from "@/lib/demo";
+import { isDemoLoginEnabled } from "@/lib/demo";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 const DEMO_ERRORS: Record<string, string> = {
-  "no-tenant": "The demo tenant is not seeded on this server yet.",
+  "no-tenant": "The demo workspace is not seeded on this server yet.",
   failed: "The demo sign-in did not go through. Try again in a moment."
 };
 
@@ -42,7 +42,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <div className="mb-4 flex flex-col gap-2">
             <DemoLoginButton enabled fullWidth />
             <p className="text-center text-[12px] text-ink-3">
-              Opens the seeded workspace with a full exam, plan and admit cards.
+              Opens a workspace with a full exam, plan and admit cards.
             </p>
           </div>
         ) : null}
@@ -50,21 +50,18 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <Pane>
           <PaneHead title="Account" hint={demoEnabled ? "or sign in manually" : undefined} />
           <PaneBody>
-            <LoginForm defaultEmail={demoEnabled ? DEMO_CREDENTIALS.email : undefined} />
+            <LoginForm />
           </PaneBody>
         </Pane>
 
-        {demoEnabled ? (
-          <div className="mt-4">
-            <Alert tone="info" title="Demo tenant">
-              <span className="font-mono text-[12.5px]">{DEMO_CREDENTIALS.email}</span> /{" "}
-              <span className="font-mono text-[12.5px]">{DEMO_CREDENTIALS.password}</span>
-              <div className="mt-1.5 text-[12.5px] opacity-80">
-                Read-only exploration is fine — the data is reseeded on every deploy.
-              </div>
-            </Alert>
-          </div>
-        ) : null}
+        <div className="mt-4 flex flex-col items-center gap-2 text-[13px]">
+          <p className="text-ink-3">
+            No workspace yet?{" "}
+            <Link href="/signup" className="font-medium text-ink underline underline-offset-2">
+              Create one
+            </Link>
+          </p>
+        </div>
 
         <div className="mt-5">
           <Link href="/lookup" className="inline-flex items-center gap-1.5 text-[13px] text-ink-3 hover:text-ink">

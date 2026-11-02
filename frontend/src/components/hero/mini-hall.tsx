@@ -1,10 +1,11 @@
 "use client";
 
-import { stepFor } from "@/lib/colors";
+import { tintFor } from "@/lib/colors";
 
 /**
- * Decorative hall grid for the hero. Cells light up in ash steps with a
- * staggered wave, which is the whole visual pitch in one small canvas.
+ * Decorative hall grid for the hero. Cells light up in institution tints with a
+ * staggered wave — the same colours the real hall board uses, so the preview
+ * does not promise a palette the planner doesn't deliver.
  *
  * The stagger is a CSS animation delay rather than a client-side animation
  * library: this renders ~70 cells, and the effect is identical.
@@ -23,9 +24,9 @@ export function MiniHall({
   const cells = Array.from({ length: rows * columns }, (_, index) => {
     const mixed = (index * 37 + seed * 11) % 100;
     const taken = mixed % 7 !== 0;
-    const step = [88, 76, 64, 94, 70, 82][mixed % 6] ?? 80;
+    const tint = tintFor(`seat-${mixed}`);
 
-    return { taken, step, index };
+    return { taken, tint, index };
   });
 
   return (
@@ -34,19 +35,23 @@ export function MiniHall({
       style={{ display: "grid", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap: 5 }}
       aria-hidden
     >
-      {cells.map((cell) => (
-        <div
-          key={cell.index}
-          className="cell-pop aspect-square rounded-[4px]"
-          style={{
-            animationDelay: `${0.25 + cell.index * 0.006}s`,
-            background: cell.taken ? `oklch(${cell.step}% 0 0 / 0.3)` : "oklch(100% 0 0 / .05)",
-            boxShadow: cell.taken
-              ? `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px oklch(${cell.step}% 0 0 / .5)`
-              : "inset 0 0 0 1px oklch(100% 0 0 / .05)"
-          }}
-        />
-      ))}
+      {cells.map((cell) => {
+        const css = `${cell.tint.lightness}% ${cell.tint.chroma} ${cell.tint.hue}`;
+
+        return (
+          <div
+            key={cell.index}
+            className="cell-pop aspect-square rounded-[4px]"
+            style={{
+              animationDelay: `${0.25 + cell.index * 0.006}s`,
+              background: cell.taken ? `oklch(${css} / 0.3)` : "oklch(100% 0 0 / .05)",
+              boxShadow: cell.taken
+                ? `inset 0 1px 0 oklch(100% 0 0 / .22), 0 0 0 1px oklch(${css} / .5)`
+                : "inset 0 0 0 1px oklch(100% 0 0 / .05)"
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -55,9 +60,17 @@ export function MiniHall({
 export function HueDots({ codes }: { codes: string[] }) {
   return (
     <div className="flex items-center gap-1.5">
-      {codes.map((code) => (
-        <span key={code} className="size-[9px] rounded-[2px]" style={{ background: `oklch(${stepFor(code)}% 0 0)` }} />
-      ))}
+      {codes.map((code) => {
+        const tint = tintFor(code);
+
+        return (
+          <span
+            key={code}
+            className="size-[9px] rounded-[2px]"
+            style={{ background: `oklch(${tint.lightness}% ${tint.chroma} ${tint.hue})` }}
+          />
+        );
+      })}
     </div>
   );
 }
