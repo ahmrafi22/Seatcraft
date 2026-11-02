@@ -1,0 +1,31 @@
+roll,name,institutionCode,subjectGroup,dateOfBirth
+R00001,Rafi Ahmed,IC01,Science,2000-01-15
+R00002,Nusrat Jahan,IC01,Science,2000-02-22
+R00003,Tanvir Hasan,IC02,Science,2000-03-08
+R00004,Sumaiya Islam,IC02,Commerce,2000-04-19
+R00005,Mehedi Hasan,IC03,Commerce,2000-05-03
+R00006,Farhana Akter,IC03,Arts,2000-06-27
+R00007,Arif Hossain,IC01,Science,2000-07-11
+R00008,Jannatul Ferdous,IC02,Arts,2000-08-05
+R00009,Sabbir Rahman,IC03,Science,2000-09-14
+R00010,Mim Akter,IC01,Commerce,2000-10-30
+R00011,Rakib Hasan,IC02,Science,2000-11-09
+R00012,Tasnim Rahman,IC03,Commerce,2000-12-21
+R00013,Shakib Al Hasan,IC01,Arts,2000-01-04
+R00014,Anika Tabassum,IC02,Science,2000-02-17
+R00015,Hasan Mahmud,IC03,Arts,2000-03-25
+R00016,Nabila Sultana,IC01,Science,2000-04-12
+R00017,Fahim Shahriar,IC02,Commerce,2000-05-29
+R00018,Sadia Afrin,IC03,Science,2000-06-16
+R00019,Mahin Khan,IC01,Commerce,2000-07-23
+R00020,Rima Khatun,IC02,Arts,2000-08-31
+R00021,Zahid Hasan,IC03,Science,2000-09-06
+R00022,Priya Das,IC01,Arts,2000-10-18
+R00023,Imran Kabir,IC02,Science,2000-11-27
+R00024,Shorna Akter,IC03,Commerce,2000-12-08
+R00025,Ayan Chowdhury,IC01,Science,2000-01-29
+R00026,Mitu Rani,IC02,Commerce,2000-02-13
+R00027,Sajid Hossain,IC03,Arts,2000-03-19
+R00028,Tania Islam,IC01,Science,2000-04-07
+R00029,Rubel Mia,IC02,Arts,2000-05-21
+R00030,Laboni Akter,IC03,Science,2000-06-02
