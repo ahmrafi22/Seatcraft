@@ -17,6 +17,8 @@ services:
       # Empty means "same origin": nginx proxies /api to the API. Set it only when
       # the browser must reach a different host for downloads.
       SEATCRAFT_PUBLIC_API_ORIGIN: ""
+      # Shows the one-click demo button on the public site.
+      SEATCRAFT_DEMO_LOGIN: "1"
     ports:
       - "127.0.0.1:3000:3000"
     healthcheck:
