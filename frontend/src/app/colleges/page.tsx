@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { LuBuilding2 } from "react-icons/lu";
 
 import { Topbar } from "@/components/shell/topbar";
@@ -15,7 +15,8 @@ export const dynamic = "force-dynamic";
 export default async function CollegesPage() {
   const session = await getSession();
 
-  if (!session) notFound();
+  // A nav destination, so send signed-out visitors to sign in rather than 404.
+  if (!session) redirect("/login");
 
   const institutions = await api<Institution[]>("/institutions").catch(() => [] as Institution[]);
 
