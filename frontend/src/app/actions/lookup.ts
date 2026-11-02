@@ -1,5 +1,7 @@
 "use server";
 
+import { headers } from "next/headers";
+
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { PublicSeat } from "@/lib/api/types";
@@ -8,6 +10,19 @@ export interface LookupState {
   status: "idle" | "found" | "missing" | "error";
   seat?: PublicSeat;
   message?: string;
+}
+
+/**
+ * Behind a proxy (nginx, Vercel) the API only sees the web tier's address, so every
+ * visitor would share one rate-limit bucket. Forward the real client address as a
+ * single-entry header — a chain would leave the proxy's own address as the last hop.
+ */
+async function clientAddressHeader(): Promise<Record<string, string>> {
+  const store = await headers();
+  const forwarded = store.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const address = forwarded || store.get("x-real-ip")?.trim();
+
+  return address ? { "X-Forwarded-For": address } : {};
 }
 
 /** Anonymous lookup — the tenant slug is explicit because there is no JWT. */
@@ -23,7 +38,7 @@ export async function lookupSeatAction(_prev: LookupState, formData: FormData): 
   try {
     const seat = await api<PublicSeat>(
       `/public/${encodeURIComponent(tenant)}/seat-lookup?roll=${encodeURIComponent(roll)}&dateOfBirth=${encodeURIComponent(dateOfBirth)}`,
-      { anonymous: true }
+      { anonymous: true, headers: await clientAddressHeader() }
     );
 
     return { status: "found", seat };
