@@ -33,7 +33,7 @@ export function SeedDemoForm() {
         Seed demo exam
       </Button>
       <p className="text-[11.5px] leading-relaxed text-ink-3">
-        Development only. Creates an exam, the colleges, the halls and every candidate in one call.
+        Creates an exam, colleges, halls and every candidate in one call. Available in development only.
       </p>
     </form>
   );

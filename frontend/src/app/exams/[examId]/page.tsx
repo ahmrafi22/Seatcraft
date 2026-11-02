@@ -9,10 +9,15 @@ import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { AllocationPanel } from "@/components/exams/allocation-panel";
 import { ConstraintEditor } from "@/components/exams/constraint-editor";
+import { AddHallForm } from "@/components/exams/add-hall-form";
+import { AddInstitutionForm } from "@/components/exams/add-institution-form";
+import { AddCandidateForm } from "@/components/exams/add-candidate-form";
+import { ImportCandidatesForm } from "@/components/exams/import-candidates-form";
+import { DeleteExamButton } from "@/components/exams/delete-exam-button";
 import { api } from "@/lib/api/client";
 import { getSession } from "@/lib/session";
 import { shortDate } from "@/lib/format";
-import type { AllocationRun, Candidate, Exam, Hall, Paged, SeatPlanDetail } from "@/lib/api/types";
+import type { AllocationRun, Candidate, Exam, Hall, Institution, Paged, SeatPlanDetail } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
 
@@ -36,13 +41,14 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
   const exam = await api<Exam>(`/exams/${examId}`).catch(() => null);
   if (!exam) notFound();
 
-  const [runs, halls, candidates, plan] = await Promise.all([
+  const [runs, halls, candidates, plan, institutions] = await Promise.all([
     api<AllocationRun[]>(`/exams/${examId}/allocation-runs`).catch(() => [] as AllocationRun[]),
     api<Hall[]>(`/exams/${examId}/halls`).catch(() => [] as Hall[]),
     api<Paged<Candidate>>(`/exams/${examId}/candidates?page=1&pageSize=8`).catch(() => null),
     exam.activeSeatPlanId
       ? api<SeatPlanDetail>(`/exams/${examId}/seat-plans/${exam.activeSeatPlanId}`).catch(() => null)
-      : Promise.resolve(null)
+      : Promise.resolve(null),
+    api<Institution[]>("/institutions").catch(() => [] as Institution[])
   ]);
 
   const blocking = plan?.violations.filter((violation) => violation.kind !== "RollOrderBroken").length ?? 0;
@@ -73,6 +79,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
             <ButtonLink href="/lookup" variant="ghost">
               Public lookup
             </ButtonLink>
+            <DeleteExamButton examId={exam.id} examTitle={exam.title} />
           </div>
         </div>
 
@@ -93,7 +100,13 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
           <div className="flex flex-col gap-4">
             <Reveal delay={0.06}>
               <div>
-                <AllocationPanel examId={exam.id} runs={runs} canAllocate={exam.status !== "Published" && exam.status !== "Archived"} />
+                <AllocationPanel
+                  examId={exam.id}
+                  runs={runs}
+                  canAllocate={exam.status !== "Published" && exam.status !== "Archived"}
+                  candidateCount={exam.candidateCount}
+                  hallCount={halls.length}
+                />
               </div>
             </Reveal>
 
@@ -106,7 +119,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
                 />
                 {halls.length === 0 ? (
                   <PaneBody>
-                    <div className="py-6 text-center text-[13px] text-ink-3">No halls yet.</div>
+                    <div className="py-6 text-center text-[13px] text-ink-3">
+                      No halls yet. Add one below — the grid size sets how many seats it offers.
+                    </div>
                   </PaneBody>
                 ) : (
                   <div className="overflow-x-auto">
@@ -132,13 +147,57 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
                             </td>
                             <td className="px-4 py-3 font-mono text-ink-2 tabular-nums">{hall.capacity}</td>
                             <td className="px-4 py-3 font-mono text-ink-2 tabular-nums">{hall.blockedSeats.length}</td>
-                            <td className="px-4 py-3 font-mono font-semibold text-sky tabular-nums">{hall.usableCapacity}</td>
+                            <td className="px-4 py-3 font-mono font-semibold text-ink tabular-nums">{hall.usableCapacity}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                 )}
+              </Pane>
+            </Reveal>
+
+            <Reveal delay={0.12}>
+              <Pane>
+                <PaneHead title="Add a hall" hint="grid size = seats" />
+                <PaneBody>
+                  <AddHallForm examId={exam.id} nextIndex={halls.length + 1} />
+                </PaneBody>
+              </Pane>
+            </Reveal>
+
+            <Reveal delay={0.14}>
+              <Pane>
+                <PaneHead
+                  title="Candidates"
+                  hint={candidates ? `${candidates.totalCount.toLocaleString()} total` : undefined}
+                  action={<Badge kind="neutral" dot={false}>first 8</Badge>}
+                />
+                {!candidates || candidates.items.length === 0 ? (
+                  <PaneBody>
+                    <div className="py-6 text-center text-[13px] text-ink-3">
+                      No candidates yet. Add one below, or import a CSV.
+                    </div>
+                  </PaneBody>
+                ) : (
+                  <div className="divide-y divide-white/[0.055]">
+                    {candidates.items.map((candidate) => (
+                      <div key={candidate.id} className="flex items-center gap-2.5 px-4 py-2.5">
+                        <span className="shrink-0 rounded-[5px] bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-ink-2 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.07)]">
+                          {candidate.roll}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">{candidate.fullName}</span>
+                        <span className="shrink-0 text-[11.5px] text-ink-3">{candidate.subjectGroup}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <PaneBody className="border-t border-white/[0.07]">
+                  <AddCandidateForm examId={exam.id} institutions={institutions} />
+                </PaneBody>
+                <PaneBody className="border-t border-white/[0.07]">
+                  <ImportCandidatesForm examId={exam.id} />
+                </PaneBody>
               </Pane>
             </Reveal>
           </div>
@@ -196,28 +255,10 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
 
             <Reveal delay={0.16}>
               <Pane>
-                <PaneHead
-                  title="Candidates"
-                  hint={candidates ? `${candidates.totalCount.toLocaleString()} total` : undefined}
-                  action={<Badge kind="neutral" dot={false}>first 8</Badge>}
-                />
-                {!candidates || candidates.items.length === 0 ? (
-                  <PaneBody>
-                    <div className="py-6 text-center text-[13px] text-ink-3">No candidates yet.</div>
-                  </PaneBody>
-                ) : (
-                  <div className="divide-y divide-white/[0.055]">
-                    {candidates.items.map((candidate) => (
-                      <div key={candidate.id} className="flex items-center gap-2.5 px-4 py-2.5">
-                        <span className="shrink-0 rounded-[5px] bg-white/[0.06] px-1.5 py-0.5 font-mono text-[11px] text-ink-2 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.07)]">
-                          {candidate.roll}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">{candidate.fullName}</span>
-                        <span className="shrink-0 text-[11.5px] text-ink-3">{candidate.subjectGroup}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <PaneHead title="Colleges" hint="shared across exams" />
+                <PaneBody>
+                  <AddInstitutionForm />
+                </PaneBody>
               </Pane>
             </Reveal>
           </div>

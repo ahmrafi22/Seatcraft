@@ -66,6 +66,127 @@ export async function seedDemoAction(_prev: ActionResult | null, formData: FormD
   }
 }
 
+/** Deletes an exam and everything under it. Admin-only, and irreversible. */
+export async function deleteExamAction(examId: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  try {
+    await api(`/exams/${examId}`, { method: "DELETE" });
+
+    revalidatePath("/");
+    revalidatePath("/exams");
+    return { ok: true, message: "Exam deleted." };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not delete the exam." };
+  }
+}
+
+/** Adds one hall to an exam. Grid size is what decides how many seats it offers. */export async function createHallAction(examId: string, _prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  await requireSession();
+
+  const name = String(formData.get("name") ?? "").trim();
+  const rows = clamp(Number(formData.get("rows") ?? 10), 1, 100);
+  const columns = clamp(Number(formData.get("columns") ?? 10), 1, 100);
+
+  if (!name) return { ok: false, message: "Give the hall a name." };
+
+  try {
+    await api(`/exams/${examId}/halls`, { method: "POST", body: { name, rows, columns } });
+
+    revalidatePath(`/exams/${examId}`);
+    revalidatePath("/");
+    return { ok: true, message: `Added ${name} (${rows} × ${columns}).` };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the hall." };
+  }
+}
+
+/** Colleges are tenant-wide, not per exam, so this does not take an exam id. */
+export async function createInstitutionAction(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  await requireSession();
+
+  const name = String(formData.get("name") ?? "").trim();
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+
+  if (!name || !code) return { ok: false, message: "Both the name and the code are required." };
+
+  try {
+    await api("/institutions", { method: "POST", body: { name, code } });
+
+    revalidatePath("/exams");
+    return { ok: true, message: `Added ${name}.` };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the college." };
+  }
+}
+
+export async function createCandidateAction(
+  examId: string,
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  await requireSession();
+
+  const roll = String(formData.get("roll") ?? "").trim();
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const subjectGroup = String(formData.get("subjectGroup") ?? "").trim() || "General";
+  const institutionId = String(formData.get("institutionId") ?? "");
+
+  if (!roll || !fullName) return { ok: false, message: "Roll and name are required." };
+  if (!institutionId) return { ok: false, message: "Pick a college for this candidate." };
+
+  try {
+    await api(`/exams/${examId}/candidates`, {
+      method: "POST",
+      body: { roll, fullName, subjectGroup, institutionId }
+    });
+
+    revalidatePath(`/exams/${examId}`);
+    revalidatePath("/");
+    return { ok: true, message: `Added ${roll}.` };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the candidate." };
+  }
+}
+
+/** CSV upload: roll, name, institutionCode required; subjectGroup and dateOfBirth optional. */
+export async function importCandidatesAction(
+  examId: string,
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  await requireSession();
+
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose a CSV file to import." };
+
+  try {
+    const body = new FormData();
+    body.append("file", file);
+
+    const result = await api<{ imported: number; skipped: number; errors: { line: number; message: string }[] }>(
+      `/exams/${examId}/candidates/import`,
+      { method: "POST", body }
+    );
+
+    revalidatePath(`/exams/${examId}`);
+    revalidatePath("/");
+
+    if (result.skipped > 0) {
+      const first = result.errors[0];
+      return {
+        ok: result.imported > 0,
+        message: `Imported ${result.imported}, skipped ${result.skipped}.${first ? ` Line ${first.line}: ${first.message}` : ""}`
+      };
+    }
+
+    return { ok: true, message: `Imported ${result.imported} candidates.` };
+  } catch (error) {
+    return { ok: false, message: error instanceof ApiError ? error.detail : "Could not import the file." };
+  }
+}
+
 export async function startAllocationAction(
   examId: string,
   strategy: Strategy,

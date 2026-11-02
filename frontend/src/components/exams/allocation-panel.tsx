@@ -22,11 +22,15 @@ const STRATEGIES: { value: Strategy; label: string; hint: string }[] = [
 export function AllocationPanel({
   examId,
   runs: initialRuns,
-  canAllocate
+  canAllocate,
+  candidateCount = 0,
+  hallCount = 0
 }: {
   examId: string;
   runs: AllocationRun[];
   canAllocate: boolean;
+  candidateCount?: number;
+  hallCount?: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -157,6 +161,23 @@ export function AllocationPanel({
           <p className="mt-2.5 text-[11.5px] text-ink-3">
             This exam is published, so it can no longer be re-allocated. Create a new exam to try another strategy.
           </p>
+        ) : null}
+
+        {canAllocate && candidateCount === 0 ? (
+          <div className="mt-3">
+            <Alert tone="warning" title="No candidates to allocate">
+              Add candidates below, or import a CSV. Allocation needs at least one candidate
+              {hallCount === 0 ? " and one hall." : "."}
+            </Alert>
+          </div>
+        ) : null}
+
+        {canAllocate && candidateCount > 0 && hallCount === 0 ? (
+          <div className="mt-3">
+            <Alert tone="warning" title="No halls to seat them in">
+              Add a hall below — the grid size decides how many seats it offers.
+            </Alert>
+          </div>
         ) : null}
 
         {isWorking && activeRun ? (

@@ -16,3 +16,15 @@ export const DEMO_CREDENTIALS = {
   email: process.env.SEATCRAFT_DEMO_EMAIL ?? "admin@demo.test",
   password: process.env.SEATCRAFT_DEMO_PASSWORD ?? "Passw0rd!123"
 };
+
+/**
+ * The one-call demo seeder writes 500 candidates, so it is a development tool.
+ * The API refuses it outside Development; this flag hides the form entirely so
+ * a production visitor never sees a button that is guaranteed to fail.
+ */
+export function isDemoSeedEnabled(): boolean {
+  if (process.env.SEATCRAFT_DEMO_SEED === "1") return true;
+  if (process.env.SEATCRAFT_DEMO_SEED === "0") return false;
+
+  return process.env.NODE_ENV !== "production";
+}

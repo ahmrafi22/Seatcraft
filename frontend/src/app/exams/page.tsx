@@ -9,8 +9,10 @@ import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { CreateExamForm } from "@/components/exams/create-exam-form";
 import { SeedDemoForm } from "@/components/exams/seed-demo-form";
+import { AddInstitutionForm } from "@/components/exams/add-institution-form";
 import { api } from "@/lib/api/client";
 import { getSession } from "@/lib/session";
+import { isDemoSeedEnabled } from "@/lib/demo";
 import { shortDate } from "@/lib/format";
 import type { Exam } from "@/lib/api/types";
 
@@ -20,6 +22,7 @@ export const dynamic = "force-dynamic";
 export default async function ExamsPage() {
   const session = await getSession();
   const exams = session ? await api<Exam[]>("/exams").catch(() => [] as Exam[]) : [];
+  const seedEnabled = isDemoSeedEnabled();
 
   return (
     <>
@@ -113,14 +116,25 @@ export default async function ExamsPage() {
               </Pane>
             </Reveal>
 
-            <Reveal delay={0.12}>
+            <Reveal delay={0.09}>
               <Pane>
-                <PaneHead title="Demo data" hint="dev only" />
+                <PaneHead title="New college" hint="shared across exams" />
                 <PaneBody>
-                  <SeedDemoForm />
+                  <AddInstitutionForm />
                 </PaneBody>
               </Pane>
             </Reveal>
+
+            {seedEnabled ? (
+              <Reveal delay={0.12}>
+                <Pane>
+                  <PaneHead title="Demo data" hint="development only" />
+                  <PaneBody>
+                    <SeedDemoForm />
+                  </PaneBody>
+                </Pane>
+              </Reveal>
+            ) : null}
           </div>
         </div>
       </main>
