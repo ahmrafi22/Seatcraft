@@ -18,6 +18,8 @@ artifacts/
 
 # Local agent notes (never committed)
 context.md
+.agents/
+skills-lock.json
 
 # Local config and secrets
 appsettings.Local.json
