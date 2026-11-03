@@ -42,7 +42,9 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
         builder.HasKey(exam => exam.Id);
         builder.Property(exam => exam.Title).HasMaxLength(300).IsRequired();
         builder.Property(exam => exam.Description).HasMaxLength(2000);
-        builder.Property(exam => exam.ExamDate).HasColumnName("exam_date");
+        // Explicit date type: without it, the SQLite-generated migration leaves the
+        // column as text on Postgres and Npgsql cannot read it as DateOnly.
+        builder.Property(exam => exam.ExamDate).HasColumnName("exam_date").HasColumnType("date");
         builder.Property(exam => exam.Status).HasConversion<string>().HasMaxLength(32);
 
         builder.OwnsOne(exam => exam.Constraints, constraints =>
