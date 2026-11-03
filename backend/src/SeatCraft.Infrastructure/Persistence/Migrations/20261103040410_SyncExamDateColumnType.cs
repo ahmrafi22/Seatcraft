@@ -12,6 +12,9 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
     /// The model now declares the column as <c>date</c>, so the snapshot has to say
     /// the same or EF reports pending changes and refuses to start. SQLite needs no
     /// DDL at all, so the conversion only runs on Postgres.
+    ///
+    /// The conversion is guarded because a database that was repaired by hand may
+    /// already hold a real date column, and casting date -> text -> date fails.
     /// </summary>
     public partial class SyncExamDateColumnType : Migration
     {
@@ -21,7 +24,23 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
             if (ActiveProvider?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true)
             {
                 migrationBuilder.Sql(
-                    "ALTER TABLE exams ALTER COLUMN exam_date TYPE date USING NULLIF(exam_date, '')::date;");
+                    """
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_schema = current_schema()
+                              AND table_name = 'exams'
+                              AND column_name = 'exam_date'
+                              AND data_type <> 'date'
+                        ) THEN
+                            ALTER TABLE exams
+                                ALTER COLUMN exam_date TYPE date
+                                USING NULLIF(exam_date, '')::date;
+                        END IF;
+                    END $$;
+                    """);
             }
         }
 
