@@ -8,7 +8,6 @@ import {
   LuFileText,
   LuLayoutGrid,
   LuSearch,
-  LuShieldCheck,
   LuTimer
 } from "react-icons/lu";
 
@@ -34,8 +33,7 @@ export default function LandingPage() {
       <main className="mx-auto w-full max-w-[1180px] px-6">
         <Hero demoEnabled={demoEnabled} />
         <Rule />
-        <Flow />
-        <Facts />
+        <Bento />
         <Close demoEnabled={demoEnabled} />
       </main>
 
@@ -88,14 +86,7 @@ function Hero({ demoEnabled }: { demoEnabled: boolean }) {
   return (
     <section className="grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-12 lg:py-20">
       <Reveal>
-        <div className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.12)]">
-          <span className="size-1.5 rounded-full bg-[oklch(78%_0_0)] shadow-[0_0_10px_oklch(100%_0_0/.9)]" />
-          <span className="font-mono text-[10.5px] tracking-[0.1em] text-ink-2 uppercase">
-            Constraint solver · .NET 9
-          </span>
-        </div>
-
-        <h1 className="text-gradient mt-5 text-[clamp(34px,5.2vw,54px)] leading-[1.06] font-semibold tracking-[-0.04em]">
+        <h1 className="text-gradient text-[clamp(34px,5.2vw,54px)] leading-[1.06] font-semibold tracking-[-0.04em]">
           Every candidate
           <br />
           in the right seat.
@@ -119,25 +110,6 @@ function Hero({ demoEnabled }: { demoEnabled: boolean }) {
             Find a seat
           </ButtonLink>
         </div>
-
-        <p className="mt-3 text-[12.5px] text-ink-3">
-          {demoEnabled
-            ? "The demo opens a seeded workspace: 500 candidates, 12 halls, one published plan."
-            : "No card, no sales call. Sign up and run your first allocation in a minute."}
-        </p>
-
-        <div className="mt-9 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/[0.08] pt-6">
-          {[
-            { label: "Solver", value: "3 strategies" },
-            { label: "Hard rule", value: "No same college" },
-            { label: "Output", value: "PDF + lookup" }
-          ].map((item) => (
-            <div key={item.label}>
-              <div className="label-mono">{item.label}</div>
-              <div className="mt-1 text-[13.5px] font-medium">{item.value}</div>
-            </div>
-          ))}
-        </div>
       </Reveal>
 
       <Reveal delay={0.1}>
@@ -147,142 +119,154 @@ function Hero({ demoEnabled }: { demoEnabled: boolean }) {
             className="pointer-events-none absolute -inset-8 -z-10 rounded-[36px] bg-[radial-gradient(closest-side,oklch(100%_0_0/.09),transparent)] blur-2xl"
           />
           <SeatDemo />
-          <p className="mt-3 text-center font-mono text-[11px] text-ink-3">
-            The flagged seat moves to the free one — the conflict clears.
-          </p>
         </div>
       </Reveal>
     </section>
   );
 }
-
-const STEPS = [
-  {
-    Icon: LuBuilding2,
-    title: "Add halls and candidates",
-    body: "Type them in, or import a CSV with roll, name, college and subject group. Every college keeps its own colour across the whole board.",
-    aside: "CSV import · 500 rows in a second"
-  },
-  {
-    Icon: LuTimer,
-    title: "Run the solver",
-    body: "Three strategies, strict by default. The strict pass places everyone, then repairs what it can — swapping and relocating until no two neighbours share a college.",
-    aside: "5,000 candidates · 40 halls · 83 ms"
-  },
-  {
-    Icon: LuLayoutGrid,
-    title: "Adjust by hand",
-    body: "Drag any seat to swap two candidates or move one into a free seat. Violations stay marked, and the plan refuses to publish while a blocking one remains.",
-    aside: "Live re-check on every move"
-  },
-  {
-    Icon: LuFileText,
-    title: "Publish the documents",
-    body: "Admit cards and attendance sheets render as A5 PDFs behind signed links, and candidates look up their own seat with a roll number and date of birth.",
-    aside: "HMAC-signed · 500 cards as one zip"
-  }
-] as const;
 
 function Rule() {
   return (
     <Reveal>
       <section className="rounded-[var(--radius-pane)] bg-[linear-gradient(140deg,oklch(100%_0_0/.08),oklch(100%_0_0/.02))] p-7 shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.08)] sm:p-9">
-        <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+        <div className="flex flex-col items-start gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="label-mono">The hard part</div>
             <h2 className="mt-3 max-w-[26ch] text-[clamp(22px,3vw,30px)] leading-[1.15] font-semibold tracking-[-0.03em]">
               Two students from one college, side by side, is a cheating risk.
             </h2>
-            <p className="mt-3 max-w-[58ch] text-[14px] leading-relaxed text-ink-2">
-              Exam boards call it an adjacency violation. It is easy to describe and hard
-              to satisfy once a few large colleges dominate the roster — a greedy pass
-              paints itself into a corner and leaves conflicts it can never undo.
-            </p>
           </div>
-
-          <div className="flex gap-3">
-            {[
-              { value: "0", label: "adjacent pairs", tone: "ok" },
-              { value: "3", label: "strategies", tone: "muted" }
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="min-w-[112px] rounded-[var(--radius-ctl)] bg-[oklch(0%_0_0/.3)] px-4 py-3.5 shadow-[inset_0_1px_0_oklch(100%_0_0/.08),0_0_0_1px_oklch(100%_0_0/.08)]"
-              >
-                <div
-                  className="text-[26px] font-semibold tracking-[-0.03em] tabular-nums"
-                  style={{ color: stat.tone === "ok" ? "var(--color-ink)" : "var(--color-ink-2)" }}
-                >
-                  {stat.value}
-                </div>
-                <div className="mt-0.5 font-mono text-[10px] tracking-[0.1em] text-ink-3 uppercase">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="max-w-[46ch] text-[14px] leading-relaxed text-ink-2">
+            Exam boards call it an adjacency violation. A greedy pass paints itself into a
+            corner and leaves conflicts it can never undo — so SeatCraft plants the hall,
+            then repairs what remains until the board is clean.
+          </p>
         </div>
       </section>
     </Reveal>
   );
 }
 
-function Flow() {
+function Bento() {
   return (
     <section id="how" className="scroll-mt-24 py-16 lg:py-20">
       <Reveal>
         <div className="label-mono">How it works</div>
         <h2 className="mt-3 max-w-[30ch] text-[clamp(24px,3.4vw,34px)] leading-[1.12] font-semibold tracking-[-0.03em]">
-          Four steps from a roster to a seat plan people trust.
+          From a roster to a plan people trust.
         </h2>
       </Reveal>
 
-      <ol className="mt-9 grid gap-4 md:grid-cols-2">
-        {STEPS.map((step, index) => (
-          <Reveal key={step.title} delay={0.06 * index}>
-            <li className="glass-pane h-full rounded-[var(--radius-pane)] p-6">
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
-                  <step.Icon className="size-[15px] text-ink" />
+      <div className="mt-9 grid gap-4 lg:grid-cols-12">
+        {/* Import — full width opener, spans everything */}
+        <Reveal className="lg:col-span-12">
+          <article className="glass-pane flex flex-col gap-4 rounded-[var(--radius-pane)] p-6 sm:flex-row sm:items-center sm:gap-6 sm:p-7">
+            <span className="grid size-11 flex-none place-items-center rounded-[12px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
+              <LuBuilding2 className="size-[18px] text-ink" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-[16px] font-semibold tracking-[-0.02em]">
+                <span className="mr-2 font-mono text-[12px] font-normal tracking-[0.12em] text-ink-3">
+                  01
                 </span>
-                <span className="font-mono text-[11px] tracking-[0.14em] text-ink-3">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
+                Import halls and candidates
+              </h3>
+              <p className="mt-1.5 max-w-[70ch] text-[13.5px] leading-relaxed text-ink-2">
+                Type them in, or import a CSV — roll, name, college, subject group. Every
+                college keeps its own colour across the whole board.
+              </p>
+            </div>
+          </article>
+        </Reveal>
 
-              <h3 className="mt-4 text-[16px] font-semibold tracking-[-0.02em]">{step.title}</h3>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-ink-2">{step.body}</p>
-
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10.5px] text-ink-3 shadow-[inset_0_0_0_1px_oklch(100%_0_0/.08)]">
-                <LuShieldCheck className="size-3" />
-                {step.aside}
+        {/* Solve — the hero card, tall */}
+        <Reveal className="lg:col-span-7" delay={0.06}>
+          <article className="glass-pane flex h-full flex-col rounded-[var(--radius-pane)] p-7">
+            <div className="flex items-start justify-between gap-4">
+              <span className="grid size-11 flex-none place-items-center rounded-[12px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
+                <LuTimer className="size-[18px] text-ink" />
+              </span>
+              <div className="text-right">
+                <div className="text-[30px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
+                  83 ms
+                </div>
+                <div className="mt-1 font-mono text-[10px] tracking-[0.1em] text-ink-3 uppercase">
+                  5,000 candidates · 40 halls
+                </div>
               </div>
-            </li>
-          </Reveal>
-        ))}
-      </ol>
+            </div>
+            <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.02em]">
+              <span className="mr-2 font-mono text-[12px] font-normal tracking-[0.12em] text-ink-3">
+                02
+              </span>
+              Run the solver
+            </h3>
+            <p className="mt-2 max-w-[52ch] text-[13.5px] leading-relaxed text-ink-2">
+              Three strategies, strict by default. The strict pass places everyone, then
+              repairs what it can — swapping and relocating until no two neighbours share a
+              college.
+            </p>
+          </article>
+        </Reveal>
+
+        {/* Adjust — stacked on the right of Solve */}
+        <Reveal className="lg:col-span-5" delay={0.12}>
+          <article className="glass-pane flex h-full flex-col rounded-[var(--radius-pane)] p-7">
+            <span className="grid size-11 flex-none place-items-center rounded-[12px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
+              <LuLayoutGrid className="size-[18px] text-ink" />
+            </span>
+            <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.02em]">
+              <span className="mr-2 font-mono text-[12px] font-normal tracking-[0.12em] text-ink-3">
+                03
+              </span>
+              Adjust by hand
+            </h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-2">
+              Drag any seat to swap two candidates or move one into a free seat. Violations
+              stay marked, and nothing publishes while a blocking one remains.
+            </p>
+          </article>
+        </Reveal>
+
+        {/* Publish — documents */}
+        <Reveal className="lg:col-span-7" delay={0.06}>
+          <article className="glass-pane flex h-full flex-col rounded-[var(--radius-pane)] p-7">
+            <span className="grid size-11 flex-none place-items-center rounded-[12px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
+              <LuFileText className="size-[18px] text-ink" />
+            </span>
+            <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.02em]">
+              <span className="mr-2 font-mono text-[12px] font-normal tracking-[0.12em] text-ink-3">
+                04
+              </span>
+              Publish the documents
+            </h3>
+            <p className="mt-2 max-w-[52ch] text-[13.5px] leading-relaxed text-ink-2">
+              Admit cards and attendance sheets render as A5 PDFs behind HMAC-signed links —
+              500 cards as one zip.
+            </p>
+          </article>
+        </Reveal>
+
+        {/* Lookup — closing card */}
+        <Reveal className="lg:col-span-5" delay={0.12}>
+          <article className="glass-pane flex h-full flex-col rounded-[var(--radius-pane)] p-7">
+            <span className="grid size-11 flex-none place-items-center rounded-[12px] bg-white/[0.08] shadow-[inset_0_1px_0_oklch(100%_0_0/.16),0_0_0_1px_oklch(100%_0_0/.1)]">
+              <LuSearch className="size-[18px] text-ink" />
+            </span>
+            <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.02em]">
+              <span className="mr-2 font-mono text-[12px] font-normal tracking-[0.12em] text-ink-3">
+                05
+              </span>
+              Public seat lookup
+            </h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-2">
+              Candidates find their own seat with a roll number and date of birth — rate
+              limited, never browsable.
+            </p>
+          </article>
+        </Reveal>
+      </div>
     </section>
-  );
-}
-
-function Facts() {
-  return (
-    <Reveal>
-      <section className="grid gap-px overflow-hidden rounded-[var(--radius-pane)] bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { value: "83 ms", label: "5,000 candidates placed", hint: "40 halls, 120 colleges" },
-          { value: "11", label: "College colours", hint: "WCAG AA on every tile" },
-          { value: "A5", label: "Admit card size", hint: "Photo, seat, date, rules" },
-          { value: "20 / min", label: "Lookup rate limit", hint: "Per address, never browsable" }
-        ].map((fact) => (
-          <div key={fact.label} className="bg-[oklch(17%_0_0/.9)] px-5 py-6">
-            <div className="text-[24px] font-semibold tracking-[-0.03em] tabular-nums">{fact.value}</div>
-            <div className="mt-1 text-[13px] font-medium text-ink-2">{fact.label}</div>
-            <div className="mt-0.5 text-[12px] text-ink-3">{fact.hint}</div>
-          </div>
-        ))}
-      </section>
-    </Reveal>
   );
 }
 
@@ -297,7 +281,7 @@ function Close({ demoEnabled }: { demoEnabled: boolean }) {
             </h2>
             <p className="mt-2.5 max-w-[52ch] text-[13.5px] text-ink-2">
               One click seeds 500 candidates across 12 halls, runs the solver and publishes a
-              plan with admit cards — no signup, no credentials to type.
+              plan with admit cards.
             </p>
           </div>
 
@@ -334,7 +318,6 @@ function Footer() {
           <Link href="/login" className="transition-colors hover:text-ink">
             Sign in
           </Link>
-          <span className="font-mono text-[11px]">.NET 9 · Next.js · QuestPDF</span>
         </div>
       </div>
     </footer>

@@ -106,10 +106,36 @@
   background: currentColor;
 }
 
+.sd-hall {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  gap: clamp(26px, 8%, 44px);
+  min-height: 0;
+}
+
+/* The walkway. A faint gradient so the gap reads as floor, not dead space. */
+.sd-hall::before {
+  content: "";
+  flex: none;
+  width: 2px;
+  align-self: stretch;
+  margin: auto 0;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    oklch(100% 0 0 / 0.05) 18%,
+    oklch(100% 0 0 / 0.05) 82%,
+    transparent
+  );
+}
+
 .sd-grid {
   display: grid;
   flex: 1;
   gap: 7px;
+  min-width: 0;
   min-height: 0;
 }
 
@@ -216,6 +242,13 @@
     0 18px 30px -12px oklch(0% 0 0 / 0.85);
 }
 
+.sd .ss-stage[data-layout="compact"] .sd-fly {
+  width: 44px;
+  height: 40px;
+  margin: -20px 0 0 -22px;
+  transform: translate(20px, 17px) scale(1.08) rotate(-2deg);
+}
+
 .sd-foot {
   display: flex;
   align-items: center;
@@ -262,6 +295,10 @@
 .sd .ss-stage[data-layout="compact"] .sd-board {
   gap: 11px;
   padding: 13px;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-hall {
+  gap: 18px;
 }
 
 .sd .ss-stage[data-layout="compact"] .sd-grid {
