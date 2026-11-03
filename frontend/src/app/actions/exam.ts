@@ -66,6 +66,7 @@ export async function createExamWithDataAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const examDate = String(formData.get("examDate") ?? "").trim();
   const hallCount = clamp(Number(formData.get("hallCount") ?? 0), 0, 50);
   const rows = clamp(Number(formData.get("rows") ?? 10), 1, 100);
   const columns = clamp(Number(formData.get("columns") ?? 10), 1, 100);
@@ -82,6 +83,14 @@ export async function createExamWithDataAction(
       method: "POST",
       body: { title, description: description || null }
     });
+
+    // The API takes the date on update, so set it right after creating.
+    if (examDate) {
+      await api(`/exams/${exam.id}`, {
+        method: "PUT",
+        body: { title, description: description || null, examDate }
+      });
+    }
 
     const notes: string[] = [];
 

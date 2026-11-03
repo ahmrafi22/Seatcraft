@@ -11,11 +11,12 @@ public sealed record ExamDto(
     Guid? ActiveSeatPlanId,
     int CandidateCount,
     int HallCount,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateOnly? ExamDate);
 
 public sealed record CreateExamRequest(string Title, string? Description);
 
-public sealed record UpdateExamRequest(string Title, string? Description);
+public sealed record UpdateExamRequest(string Title, string? Description, DateOnly? ExamDate);
 
 public sealed record UpdateConstraintsRequest(
     bool PreventSameInstitutionAdjacent,

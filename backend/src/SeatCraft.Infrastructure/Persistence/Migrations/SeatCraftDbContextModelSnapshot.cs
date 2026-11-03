@@ -21,63 +21,63 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("BestViolationCount")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("CandidateCount")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CurrentPhase")
                         .HasMaxLength(200)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("DurationMs")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("ExamId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FailureReason")
                         .HasMaxLength(1000)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("HallsUsed")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("IdempotencyKey")
                         .IsRequired()
                         .HasMaxLength(200)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ProgressPercent")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("ResultSeatPlanId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Seed")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Strategy")
                         .IsRequired()
                         .HasMaxLength(32)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -96,39 +96,39 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(512)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(32)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -144,39 +144,39 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ActorUserId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Detail")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("ExamId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsForced")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(1000)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -189,47 +189,47 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateOnly?>("DateOfBirth")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("ExamId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(300)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("InstitutionId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsSeatLocked")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PhotoUrl")
                         .HasMaxLength(1000)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Roll")
                         .IsRequired()
                         .HasMaxLength(50)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SubjectGroup")
                         .IsRequired()
                         .HasMaxLength(100)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -245,33 +245,37 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ActiveSeatPlanId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
-                        ;
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("ExamDate")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("exam_date");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -284,33 +288,33 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("BlockedSeats")
                         .IsRequired()
                         .HasMaxLength(20000)
-                        
+                        .HasColumnType("TEXT")
                         .HasColumnName("blocked_seats");
 
                     b.Property<int?>("CapacityOverride")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("ExamId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -324,29 +328,29 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("CandidateCount")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -360,33 +364,33 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("AllocationRunId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("ExamId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long?>("PublishedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TenantId")
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ViolationCount")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -399,23 +403,23 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("CreatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(100)
-                        ;
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
-                        ;
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -430,22 +434,22 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                     b.OwnsOne("SeatCraft.Domain.ValueObjects.AllocationConstraints", "Constraints", b1 =>
                         {
                             b1.Property<Guid>("ExamId")
-                                ;
+                                .HasColumnType("TEXT");
 
                             b1.Property<bool>("AllowHallSkipping")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("allow_hall_skipping");
 
                             b1.Property<bool>("KeepSubjectGroupContiguous")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("keep_subject_group_contiguous");
 
                             b1.Property<bool>("MaintainRollOrder")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("maintain_roll_order");
 
                             b1.Property<bool>("PreventSameInstitutionAdjacent")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("prevent_same_institution_adjacent");
 
                             b1.HasKey("ExamId");
@@ -465,14 +469,14 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                     b.OwnsOne("SeatCraft.Domain.ValueObjects.HallLayout", "Layout", b1 =>
                         {
                             b1.Property<Guid>("HallId")
-                                ;
+                                .HasColumnType("TEXT");
 
                             b1.Property<int>("Columns")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("columns");
 
                             b1.Property<int>("Rows")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("rows");
 
                             b1.HasKey("HallId");
@@ -493,26 +497,26 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                ;
+                                .HasColumnType("TEXT");
 
                             b1.Property<Guid>("CandidateId")
-                                
+                                .HasColumnType("TEXT")
                                 .HasColumnName("candidate_id");
 
                             b1.Property<int>("Column")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("column");
 
                             b1.Property<Guid>("HallId")
-                                
+                                .HasColumnType("TEXT")
                                 .HasColumnName("hall_id");
 
                             b1.Property<int>("Row")
-                                
+                                .HasColumnType("INTEGER")
                                 .HasColumnName("row");
 
                             b1.Property<Guid>("SeatPlanId")
-                                
+                                .HasColumnType("TEXT")
                                 .HasColumnName("seat_plan_id");
 
                             b1.HasKey("Id");

@@ -21,6 +21,7 @@ export interface Exam {
   candidateCount: number;
   hallCount: number;
   createdAt: string;
+  examDate: string | null;
 }
 
 export interface Institution {

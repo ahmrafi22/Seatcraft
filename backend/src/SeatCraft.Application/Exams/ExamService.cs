@@ -35,6 +35,7 @@ public sealed class ExamService(ISeatCraftData data, IUnitOfWork unitOfWork, ICu
     {
         var exam = await LoadAsync(id, cancellationToken);
         exam.Rename(request.Title, request.Description);
+        exam.Schedule(request.ExamDate);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return ToDto(exam);
@@ -95,6 +96,7 @@ public sealed class ExamService(ISeatCraftData data, IUnitOfWork unitOfWork, ICu
             exam.ActiveSeatPlanId,
             candidateCount,
             hallCount,
-            exam.CreatedAt);
+            exam.CreatedAt,
+            exam.ExamDate);
     }
 }

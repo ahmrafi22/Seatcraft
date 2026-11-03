@@ -26,6 +26,13 @@ public sealed class Exam : TenantEntity
 
     public string? Description { get; private set; }
 
+    /// <summary>
+    /// The day the exam is actually sat. Optional — an exam is often created before
+    /// its date is fixed — but admit cards need it, so they fall back to a placeholder
+    /// rather than printing the creation timestamp as if it were the exam date.
+    /// </summary>
+    public DateOnly? ExamDate { get; private set; }
+
     public ExamStatus Status { get; private set; }
 
     public AllocationConstraints Constraints { get; private set; } = AllocationConstraints.Default;
@@ -46,6 +53,14 @@ public sealed class Exam : TenantEntity
         EnsureEditable();
         Constraints = constraints;
         Status = ExamStatus.Configured;
+        Touch();
+    }
+
+    /// <summary>Sets or clears the scheduled exam date. Only while the exam is editable.</summary>
+    public void Schedule(DateOnly? examDate)
+    {
+        EnsureEditable();
+        ExamDate = examDate;
         Touch();
     }
 

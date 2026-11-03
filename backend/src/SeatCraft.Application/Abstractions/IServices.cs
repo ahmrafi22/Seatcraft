@@ -28,8 +28,13 @@ public sealed record AdmitCardModel(
     string HallName,
     string SeatLabel,
     DateTimeOffset ExamDate,
-    string? PhotoUrl);
-
+    string? PhotoUrl,
+    string? ExamDateLabel = null,
+    string? HallAddress = null,
+    int? SeatRow = null,
+    int? SeatColumn = null,
+    string? TenantName = null,
+    string? ExamDescription = null);
 public interface IAttendanceSheetGenerator
 {
     PdfDocument Generate(AttendanceSheetModel model);

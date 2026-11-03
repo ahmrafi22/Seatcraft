@@ -76,7 +76,11 @@ public sealed class DocumentArchiveService(
                 hallNames.GetValueOrDefault(assignment.HallId, string.Empty),
                 assignment.Label,
                 exam.CreatedAt,
-                candidate.PhotoUrl));
+                candidate.PhotoUrl,
+                ExamDateLabel: exam.ExamDate is DateOnly date ? date.ToString("dd MMM yyyy") : "To be announced",
+                SeatRow: assignment.Row,
+                SeatColumn: assignment.Column,
+                ExamDescription: exam.Description));
 
             var entry = archive.CreateEntry(document.FileName, CompressionLevel.Fastest);
 

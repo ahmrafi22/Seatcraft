@@ -97,6 +97,7 @@ public sealed class DemoSeedService(
             rows,
             columns,
             publish: true,
+            21,
             cancellationToken);
 
         await BuildExamAsync(
@@ -108,6 +109,7 @@ public sealed class DemoSeedService(
             8,
             8,
             publish: false,
+            35,
             cancellationToken);
 
         await BuildExamAsync(
@@ -119,6 +121,7 @@ public sealed class DemoSeedService(
             6,
             6,
             publish: false,
+            60,
             cancellationToken,
             allocate: false);
 
@@ -158,10 +161,17 @@ public sealed class DemoSeedService(
         int rows,
         int columns,
         bool publish,
+        int daysFromNow,
         CancellationToken cancellationToken,
         bool allocate = true)
     {
         var exam = await examService.CreateAsync(new CreateExamRequest(title, description), cancellationToken);
+
+        // A real date, so admit cards print something meaningful.
+        await examService.UpdateAsync(
+            exam.Id,
+            new UpdateExamRequest(title, description, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(daysFromNow))),
+            cancellationToken);
 
         for (var i = 0; i < Math.Max(1, hallCount); i++)
         {

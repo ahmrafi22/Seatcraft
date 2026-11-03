@@ -32,6 +32,7 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
   // Controlled so the autofill button can populate them for review before submit.
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [examDate, setExamDate] = useState("");
   const [hallCount, setHallCount] = useState(1);
   const [rows, setRows] = useState(10);
   const [columns, setColumns] = useState(10);
@@ -42,8 +43,12 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
   }
 
   function autofill() {
+    const date = new Date();
+    date.setDate(date.getDate() + 14 + Math.floor(Math.random() * 30));
+
     setTitle(EXAM_TITLES[Math.floor(Math.random() * EXAM_TITLES.length)] ?? "HSC Admission Test 2026");
     setDescription(EXAM_DESCRIPTIONS[Math.floor(Math.random() * EXAM_DESCRIPTIONS.length)] ?? "");
+    setExamDate(date.toISOString().slice(0, 10));
     setHallCount(2 + Math.floor(Math.random() * 3));
     setRows(8 + Math.floor(Math.random() * 4));
     setColumns(8 + Math.floor(Math.random() * 4));
@@ -101,6 +106,16 @@ export function CreateExamDialog({ institutions = [] }: { institutions?: Institu
                 maxLength={400}
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
+              />
+            </Field>
+
+            <Field label="Exam date" htmlFor="wiz-date" hint="Printed on every admit card.">
+              <Input
+                id="wiz-date"
+                name="examDate"
+                type="date"
+                value={examDate}
+                onChange={(event) => setExamDate(event.target.value)}
               />
             </Field>
           </div>

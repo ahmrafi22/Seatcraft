@@ -7,6 +7,15 @@ import { seatFill, seatInk, seatRim } from "@/lib/colors";
 import { seatLabel } from "@/lib/format";
 import type { Hall, SeatAssignment } from "@/lib/api/types";
 
+/** "Nusrat Jahan" → "Nusrat J." — enough to tell two seats apart at tile size. */
+function shortName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+
+  if (parts.length === 1) return parts[0] ?? "";
+
+  return `${parts[0]} ${parts[parts.length - 1]?.[0] ?? ""}.`;
+}
+
 export interface BoardSeat {
   row: number;
   column: number;
@@ -145,8 +154,8 @@ export function HallBoard({
             }}
             onClick={() => onSelect(isSelected ? null : assignment.candidateId)}
             className={cn(
-              "relative grid aspect-square cursor-grab place-items-center rounded-[7px]",
-              "font-mono text-[10.5px] font-semibold",
+              "group relative flex aspect-square cursor-grab flex-col items-center justify-center overflow-hidden rounded-[7px]",
+              "px-0.5 leading-none",
               "transition-[transform,box-shadow,opacity] duration-150 ease-[var(--ease-out-soft)]",
               "hover:z-10 hover:-translate-y-0.5 disabled:cursor-default",
               isDragging && "opacity-30",
@@ -163,7 +172,23 @@ export function HallBoard({
                   : undefined
             }}
           >
-            {assignment.roll.slice(-3)}
+            {/* Seat number, the thing an invigilator reads out. */}
+            <span className="font-mono text-[10.5px] font-bold tabular-nums">{seatLabel(seat.row, seat.column)}</span>
+
+            {/* Roll suffix, so two adjacent seats are never confused. */}
+            <span className="mt-[2px] font-mono text-[8px] font-medium opacity-70">{assignment.roll}</span>
+
+            {/* Name only fits on wider seats; hidden on the smallest grids. */}
+            <span className="mt-[2px] hidden w-full truncate px-0.5 text-center text-[7px] leading-tight font-medium opacity-80 [@media(min-width:640px)]:block">
+              {shortName(assignment.fullName)}
+            </span>
+
+            {isFlagged ? (
+              <span
+                aria-hidden
+                className="absolute top-[2px] right-[2px] size-1.5 rounded-full bg-[oklch(69%_.20_27)] shadow-[0_0_6px_oklch(69%_.20_27)]"
+              />
+            ) : null}
           </button>
         );
       })}
