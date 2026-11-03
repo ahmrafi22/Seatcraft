@@ -38,6 +38,19 @@ export function PlannerShell({
 
   const hall = halls.find((entry) => entry.id === hallId) ?? halls[0];
 
+  // Seats per hall, so the picker can say which halls actually hold candidates.
+  const hallCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const assignment of plan.assignments) {
+      counts.set(assignment.hallId, (counts.get(assignment.hallId) ?? 0) + 1);
+    }
+
+    return counts;
+  }, [plan.assignments]);
+
+  const hallAssigned = hall ? (hallCounts.get(hall.id) ?? 0) : 0;
+
   const flagged = useMemo(() => {
     const set = new Set<string>();
     for (const violation of plan.violations) {
@@ -162,7 +175,7 @@ export function PlannerShell({
                 <span className="sm:hidden">Hall</span>
               </span>
             }
-            hint={hall ? `${hall.rows} × ${hall.columns} · ${hall.usableCapacity} usable` : undefined}
+            hint={hall ? `${hall.rows} × ${hall.columns} · ${hallAssigned} seated · ${hall.usableCapacity} usable` : undefined}
             action={
               halls.length > 1 ? (
                 <Select
@@ -174,7 +187,7 @@ export function PlannerShell({
                 >
                   {halls.map((entry) => (
                     <option key={entry.id} value={entry.id}>
-                      {entry.name}
+                      {entry.name} · {hallCounts.get(entry.id) ?? 0}/{entry.usableCapacity}
                     </option>
                   ))}
                 </Select>
@@ -183,16 +196,45 @@ export function PlannerShell({
           />
           <PaneBody>
             {hall ? (
-              <HallBoard
-                hall={hall}
-                assignments={plan.assignments}
-                flagged={flagged}
-                selectedCandidateId={selected}
-                onSelect={setSelected}
-                onSwap={handleSwap}
-                onMove={handleMove}
-                disabled={locked || pending}
-              />
+              <>
+                {hallAssigned === 0 && assigned > 0 ? (
+                  <div className="mb-3">
+                    <Alert
+                      tone="warning"
+                      icon={<LuTriangleAlert />}
+                      title={`No candidates are seated in ${hall.name}`}
+                    >
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px]">
+                        <span>This plan seats candidates elsewhere.</span>
+                        {halls
+                          .filter((entry) => (hallCounts.get(entry.id) ?? 0) > 0)
+                          .slice(0, 3)
+                          .map((entry) => (
+                            <button
+                              key={entry.id}
+                              type="button"
+                              onClick={() => setHallId(entry.id)}
+                              className="rounded-full bg-white/10 px-2.5 py-1 font-medium underline-offset-2 hover:underline"
+                            >
+                              {entry.name} · {hallCounts.get(entry.id)}
+                            </button>
+                          ))}
+                      </div>
+                    </Alert>
+                  </div>
+                ) : null}
+
+                <HallBoard
+                  hall={hall}
+                  assignments={plan.assignments}
+                  flagged={flagged}
+                  selectedCandidateId={selected}
+                  onSelect={setSelected}
+                  onSwap={handleSwap}
+                  onMove={handleMove}
+                  disabled={locked || pending}
+                />
+              </>
             ) : (
               <div className="py-12 text-center text-[13px] text-ink-3">This exam has no halls yet.</div>
             )}

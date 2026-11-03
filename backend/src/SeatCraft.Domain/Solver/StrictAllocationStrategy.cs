@@ -80,16 +80,34 @@ public sealed class StrictAllocationStrategy : ISeatAllocationStrategy
 
                 for (var other = 0; other < grid.Count; other++)
                 {
-                    if (other == slot || !state.Swap(slot, other))
+                    if (other == slot)
                         continue;
 
-                    if (state.TotalAdjacentConflicts() < baseline)
-                    {
-                        improved = true;
-                        break;
-                    }
+                    // Try a swap; fall back to moving into the empty slot, since a
+                    // conflict caused by a crowded institution is often only fixable
+                    // by spreading into free seats.
+                    var swapped = state.Swap(slot, other);
 
-                    state.Swap(slot, other);
+                    if (swapped)
+                    {
+                        if (state.TotalAdjacentConflicts() < baseline)
+                        {
+                            improved = true;
+                            break;
+                        }
+
+                        state.Swap(slot, other);
+                    }
+                    else if (state.Move(slot, other))
+                    {
+                        if (state.TotalAdjacentConflicts() < baseline)
+                        {
+                            improved = true;
+                            break;
+                        }
+
+                        state.Move(other, slot);
+                    }
                 }
             }
         }

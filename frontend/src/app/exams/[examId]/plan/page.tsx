@@ -29,6 +29,18 @@ export default async function PlanPage({ params }: { params: Promise<{ examId: s
 
   const plan = planId ? await api<SeatPlanDetail>(`/exams/${examId}/seat-plans/${planId}`).catch(() => null) : null;
 
+  // Open on the hall that actually holds candidates. `halls[0]` is often an
+  // Auditorium that the solver never filled, which reads as a blank, colourless
+  // board even though the plan is fine.
+  const seatCountByHall = new Map<string, number>();
+
+  for (const assignment of plan?.assignments ?? []) {
+    seatCountByHall.set(assignment.hallId, (seatCountByHall.get(assignment.hallId) ?? 0) + 1);
+  }
+
+  const initialHallId =
+    [...halls].sort((a, b) => (seatCountByHall.get(b.id) ?? 0) - (seatCountByHall.get(a.id) ?? 0))[0]?.id ?? null;
+
   return (
     <>
       <Topbar
@@ -60,7 +72,7 @@ export default async function PlanPage({ params }: { params: Promise<{ examId: s
         </div>
 
         {plan ? (
-          <PlannerShell exam={exam} halls={halls} plan={plan} initialHallId={halls[0]?.id ?? null} />
+          <PlannerShell exam={exam} halls={halls} plan={plan} initialHallId={initialHallId} />
         ) : (
           <div className="glass-pane rounded-[var(--radius-pane)] px-6 py-16 text-center">
             <div className="text-[15px] font-medium">No seat plan yet</div>

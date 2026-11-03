@@ -169,6 +169,29 @@ internal sealed class AllocationState
         return true;
     }
 
+    /// <summary>
+    /// Relocates a slot's occupant to an empty slot. Swapping alone cannot resolve a
+    /// conflict when the fix is to spread a crowded institution into free seats.
+    /// Returns false when the source is empty or the target is taken.
+    /// </summary>
+    public bool Move(int from, int to)
+    {
+        var candidate = CandidateBySlot[from];
+
+        if (candidate < 0 || CandidateBySlot[to] >= 0)
+            return false;
+
+        var institution = InstitutionBySlot[from];
+
+        CandidateBySlot[from] = -1;
+        InstitutionBySlot[from] = -1;
+        SlotByCandidate[candidate] = to;
+
+        CandidateBySlot[to] = candidate;
+        InstitutionBySlot[to] = institution;
+        return true;
+    }
+
     public int AdjacentConflictCount(int slot)
     {
         var institution = InstitutionBySlot[slot];

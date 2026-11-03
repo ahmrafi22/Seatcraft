@@ -258,7 +258,7 @@ namespace SeatCraft.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly?>("ExamDate")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("date")
                         .HasColumnName("exam_date");
 
                     b.Property<string>("Status")
