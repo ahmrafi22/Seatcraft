@@ -4,8 +4,9 @@
   <img src="frontend/intro.gif" alt="SeatCraft — allocation run and hall plan" width="920" />
 </p>
 
-Exam seat allocation and admit-card engine — a portfolio project modelled on the domain
-of OnnoRokom Projukti's *E-Recruitment Pro*.
+Exam seat allocation and admit-card engine — place every candidate in a hall
+without seating two from the same institution together, then issue signed admit
+cards and a public seat lookup from the same plan.
 
 ## The problem
 
@@ -21,7 +22,7 @@ seat lookup from the same plan.
 ## Tech stack
 
 <p>
-  <img src="https://go-skill-icons.vercel.app/api/icons?i=csharp,dotnet,efcore,sqlite,postgres,redis,typescript,react,nextjs,tailwindcss,docker,nginx" />
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=dotnet,sqlite,postgres,redis,typescript,react,nextjs,tailwindcss,docker,nginx" />
 </p>
 
 - **Backend** — .NET 9, EF Core (SQLite in dev, Postgres in prod), JWT auth, QuestPDF,
@@ -44,20 +45,3 @@ dotnet run --project src/SeatCraft.Api
 Swagger UI: <http://localhost:5199/swagger>
 
 Full setup, API reference and benchmark table: [`backend/README.md`](backend/README.md).
-
-## Status
-
-- [x] Domain model and allocation constraints
-- [x] Solver: greedy, balanced, strict + independent validator + metrics
-- [x] Solver unit tests and FsCheck property tests
-- [x] Benchmark harness
-- [x] EF Core persistence, migrations, tenant query filters
-- [x] JWT auth, roles, tenant resolution
-- [x] Exam / hall / institution / candidate APIs, CSV import
-- [x] Async allocation runs, progress, cancel, idempotency, locking
-- [x] Seat overrides, audit trail, optimistic rules
-- [x] Admit card and attendance sheet PDFs
-- [x] Public seat lookup with roll + DOB
-- [x] Health checks, Serilog, Docker, CI
-- [x] Next.js frontend
-- [x] Live deployment
