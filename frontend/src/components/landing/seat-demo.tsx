@@ -139,25 +139,25 @@ const POSTER: S = { ...INITIAL, moved: true, published: true };
 
 function script(a: Act<S>) {
   return (async () => {
-    await a.wait(1200);
-    await a.move("conflict");
-    await a.wait(520);
+    await a.wait(700);
+    await a.move("conflict", { duration: 600 });
+    await a.wait(350);
 
     // The one gesture: carry the offending candidate to the free seat.
     await a.set({ dragging: true });
-    await a.drag("empty", (at) => a.put({ dragAt: at }), { duration: 1000 });
+    await a.drag("empty", (at) => a.put({ dragAt: at }), { duration: 950 });
     await a.set({ dragging: false, dragAt: null, moved: true });
-    await a.wait(900);
+    await a.wait(1100);
 
-    await a.move("publish");
-    await a.wait(400);
+    await a.move("publish", { duration: 650 });
+    await a.wait(250);
     await a.click();
     await a.set({ published: true });
-    await a.wait(3000);
+    await a.wait(2600);
 
     // Leave the way it came: the loop restarts on the seeded board.
     await a.snap({ ...INITIAL });
-    await a.wait(200);
+    await a.wait(250);
   })();
 }
 

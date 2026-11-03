@@ -64,7 +64,7 @@ function Header({ demoEnabled }: { demoEnabled: boolean }) {
           </Link>
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto hidden items-center gap-2 sm:flex">
           <Link
             href="/login"
             className="hidden h-9 items-center rounded-[var(--radius-ctl)] px-3 text-[13px] font-medium text-ink-2 transition-colors hover:bg-white/[0.07] hover:text-ink sm:inline-flex"
@@ -324,7 +324,18 @@ function Footer() {
     <footer className="border-t border-white/[0.07]">
       <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-3 px-6 py-7 text-[12.5px] text-ink-3 sm:flex-row sm:items-center sm:justify-between">
         <span>SeatCraft · exam seat allocation and admit cards</span>
-        <span className="font-mono text-[11px]">.NET 9 · Next.js · QuestPDF</span>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <a href="#how" className="transition-colors hover:text-ink">
+            How it works
+          </a>
+          <Link href="/lookup" className="transition-colors hover:text-ink">
+            Seat lookup
+          </Link>
+          <Link href="/login" className="transition-colors hover:text-ink">
+            Sign in
+          </Link>
+          <span className="font-mono text-[11px]">.NET 9 · Next.js · QuestPDF</span>
+        </div>
       </div>
     </footer>
   );
