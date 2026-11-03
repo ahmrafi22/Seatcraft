@@ -3,7 +3,9 @@ import "server-only";
 /**
  * The one-click demo sign-in is always on in development and off in a production
  * build unless `SEATCRAFT_DEMO_LOGIN=1` is set. Both the page and the action read
- * this, so the button and the endpoint cannot disagree.
+ * this, so the button and the endpoint cannot disagree — with one caveat: the
+ * landing page is prerendered, so it needs the flag at build time as well
+ * (see the Dockerfile ARG), while the action reads it per request.
  */
 export function isDemoLoginEnabled(): boolean {
   if (process.env.SEATCRAFT_DEMO_LOGIN === "1") return true;

@@ -9,6 +9,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Read by next.config.ts for the UI hint; the app itself calls the API server-side.
 ARG SEATCRAFT_API_ORIGIN=""
 ENV SEATCRAFT_API_ORIGIN=$SEATCRAFT_API_ORIGIN
+# The landing page is prerendered, so the demo CTA is decided here, at build
+# time. Runtime actions still read the same variable from the environment.
+ARG SEATCRAFT_DEMO_LOGIN=""
+ENV SEATCRAFT_DEMO_LOGIN=$SEATCRAFT_DEMO_LOGIN
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

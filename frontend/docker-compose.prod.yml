@@ -8,6 +8,8 @@ services:
       args:
         # Public origin shown in the UI hint; server-side calls use the value below.
         SEATCRAFT_API_ORIGIN: https://seatcraft.duckdns.org
+        # The landing page is static, so its call to action is baked in here.
+        SEATCRAFT_DEMO_LOGIN: "1"
     restart: unless-stopped
     mem_limit: 512m
     environment:
