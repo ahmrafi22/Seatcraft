@@ -43,7 +43,7 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
@@ -69,7 +69,7 @@ export async function setExamConstraintAction(
     await api(`/exams/${examId}/constraints`, { method: "PUT", body: next });
 
     revalidatePath(`/exams/${examId}`);
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { ok: true };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not save the rule." };

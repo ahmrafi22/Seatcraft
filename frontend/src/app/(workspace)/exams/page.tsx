@@ -33,7 +33,7 @@ export default async function ExamsPage() {
   return (
     <>
       <Topbar
-        crumbs={[{ label: "Dashboard", href: "/" }, { label: "Exams" }]}
+        crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Exams" }]}
         right={<Badge kind="neutral" dot={false}>{exams.length} total</Badge>}
       />
 

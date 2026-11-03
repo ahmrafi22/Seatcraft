@@ -30,5 +30,5 @@ export async function demoLoginAction(): Promise<void> {
     redirect(`/login?demo=${reason === 404 ? "no-tenant" : "failed"}`);
   }
 
-  redirect("/");
+  redirect("/dashboard");
 }

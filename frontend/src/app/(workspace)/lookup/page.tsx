@@ -16,7 +16,7 @@ export default async function LookupPage() {
   return (
     <>
       <Topbar
-        crumbs={[{ label: "Dashboard", href: "/" }, { label: "Seat lookup" }]}
+        crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Seat lookup" }]}
         right={<Badge kind="primary" dot={false}>Public view</Badge>}
       />
 

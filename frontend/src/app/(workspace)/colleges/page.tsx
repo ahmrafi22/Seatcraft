@@ -23,7 +23,7 @@ export default async function CollegesPage() {
   return (
     <>
       <Topbar
-        crumbs={[{ label: "Dashboard", href: "/" }, { label: "Colleges" }]}
+        crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Colleges" }]}
         right={<Badge kind="neutral" dot={false}>{institutions.length} total</Badge>}
       />
 

@@ -7,7 +7,7 @@ import { LuLayoutDashboard, LuListChecks, LuSearch, LuArmchair, LuBuilding2 } fr
 import { cn } from "@/lib/cn";
 
 const NAV = [
-  { href: "/", label: "Dashboard", Icon: LuLayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", Icon: LuLayoutDashboard },
   { href: "/exams", label: "Exams", Icon: LuListChecks },
   { href: "/colleges", label: "Colleges", Icon: LuBuilding2 },
   { href: "/lookup", label: "Lookup", Icon: LuSearch }
@@ -20,7 +20,7 @@ export function MobileNav() {
   return (
     <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-white/10 bg-[oklch(14%_0_0/.9)] px-1.5 py-1.5 shadow-[0_18px_40px_-18px_oklch(0%_0_0/.9)] backdrop-blur-2xl lg:hidden">
       {NAV.map(({ href, label, Icon }) => {
-        const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
 
         return (
           <Link
@@ -42,7 +42,7 @@ export function MobileNav() {
 
 export function MobileBrand() {
   return (
-    <Link href="/" className="flex items-center gap-2 lg:hidden">
+    <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
       <span className="grid size-7 place-items-center rounded-lg bg-[linear-gradient(140deg,oklch(96%_0_0),oklch(66%_0_0))]">
         <LuArmchair className="size-3.5 text-[oklch(16%_0_0)]" />
       </span>

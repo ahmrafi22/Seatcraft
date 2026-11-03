@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <Topbar crumbs={[{ label: "Dashboard", href: "/" }, { label: "Sign in" }]} />
+      <Topbar crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Sign in" }]} />
 
       <main className="mx-auto w-full max-w-[520px] px-6 py-12">
         <div className="label-mono">Workspace access</div>

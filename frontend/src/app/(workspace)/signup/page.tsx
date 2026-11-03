@@ -24,7 +24,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <Topbar crumbs={[{ label: "Dashboard", href: "/" }, { label: "Create workspace" }]} />
+      <Topbar crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Create workspace" }]} />
 
       <main className="mx-auto w-full max-w-[560px] px-6 py-12">
         <div className="label-mono">New workspace</div>

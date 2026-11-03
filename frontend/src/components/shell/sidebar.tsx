@@ -9,7 +9,7 @@ import { logoutAction } from "@/app/actions/auth";
 import type { Session } from "@/lib/api/types";
 
 const NAV = [
-  { href: "/", label: "Dashboard", Icon: LuLayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", Icon: LuLayoutDashboard },
   { href: "/exams", label: "Exams", Icon: LuListChecks },
   { href: "/colleges", label: "Colleges", Icon: LuBuilding2 },
   { href: "/lookup", label: "Seat lookup", Icon: LuSearch }
@@ -20,7 +20,7 @@ export function Sidebar({ session }: { session: Session | null }) {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-white/[0.075] bg-[oklch(11%_0_0/.72)] px-3 py-4 backdrop-blur-[26px] backdrop-saturate-150 lg:flex">
-      <Link href="/" className="mb-5 flex items-center gap-2.5 px-2 py-1.5">
+      <Link href="/dashboard" className="mb-5 flex items-center gap-2.5 px-2 py-1.5">
         <span className="grid size-[30px] place-items-center rounded-[9px] bg-[linear-gradient(140deg,oklch(96%_0_0),oklch(74%_0_0)_60%,oklch(56%_0_0))] shadow-[inset_0_1px_0_oklch(100%_0_0/.45),0_0_0_1px_oklch(100%_0_0/.14),0_8px_18px_-8px_oklch(0%_0_0/.9)]">
           <svg viewBox="0 0 24 24" fill="none" stroke="oklch(18% 0 0)" strokeWidth="2.3" strokeLinecap="round" className="size-4">
             <path d="M4 17V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" />
@@ -35,7 +35,7 @@ export function Sidebar({ session }: { session: Session | null }) {
 
       <nav className="flex flex-col gap-0.5">
         {NAV.map(({ href, label, Icon }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
 
           return (
             <Link

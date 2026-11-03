@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     return redirectTo("/signup?error=failed");
   }
 
-  const response = redirectTo("/");
+  const response = redirectTo("/dashboard");
   response.cookies.set(SESSION_COOKIE, encodeSession(session), sessionCookieOptions());
 
   revalidatePath("/", "layout");

@@ -56,7 +56,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ exa
   return (
     <>
       <Topbar
-        crumbs={[{ label: "Dashboard", href: "/" }, { label: "Exams", href: "/exams" }, { label: exam.title }]}
+        crumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Exams", href: "/exams" }, { label: exam.title }]}
         right={<StatusBadge status={exam.status} />}
       />
 

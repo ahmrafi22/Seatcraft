@@ -45,7 +45,7 @@ export default async function PlanPage({ params }: { params: Promise<{ examId: s
     <>
       <Topbar
         crumbs={[
-          { label: "Dashboard", href: "/" },
+          { label: "Dashboard", href: "/dashboard" },
           { label: "Exams", href: "/exams" },
           { label: exam.title, href: `/exams/${examId}` },
           { label: "Seat planner" }

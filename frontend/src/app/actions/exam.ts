@@ -32,7 +32,7 @@ export async function seedDemoAction(_prev: ActionResult | null, formData: FormD
       { method: "POST" }
     );
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     revalidatePath("/exams");
     return { ok: true, message: `Seeded ${result.candidates} candidates into ${result.halls} halls.` };
   } catch (error) {
@@ -133,7 +133,7 @@ export async function createExamWithDataAction(
       if (imported.skipped > 0) notes.push(`${imported.skipped} skipped`);
     }
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     revalidatePath("/exams");
     revalidatePath(`/exams/${exam.id}`);
 
@@ -179,7 +179,7 @@ export async function deleteExamAction(examId: string): Promise<ActionResult> {
   try {
     await api(`/exams/${examId}`, { method: "DELETE" });
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     revalidatePath("/exams");
     return { ok: true, message: "Exam deleted." };
   } catch (error) {
@@ -201,7 +201,7 @@ export async function createHallAction(examId: string, _prev: ActionResult | nul
     await api(`/exams/${examId}/halls`, { method: "POST", body: { name, rows, columns } });
 
     revalidatePath(`/exams/${examId}`);
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { ok: true, message: `Added ${name} (${rows} × ${columns}).` };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the hall." };
@@ -287,7 +287,7 @@ export async function createCandidateAction(
     });
 
     revalidatePath(`/exams/${examId}`);
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { ok: true, message: `Added ${roll}.` };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not add the candidate." };
@@ -316,7 +316,7 @@ export async function importCandidatesAction(
     );
 
     revalidatePath(`/exams/${examId}`);
-    revalidatePath("/");
+    revalidatePath("/dashboard");
 
     if (result.skipped > 0) {
       const first = result.errors[0];
@@ -372,7 +372,7 @@ export async function publishPlanAction(examId: string, planId: string): Promise
     await api<SeatPlan>(`/exams/${examId}/seat-plans/${planId}/publish`, { method: "POST" });
     revalidatePath(`/exams/${examId}`);
     revalidatePath(`/exams/${examId}/plan`);
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { ok: true, message: "Plan published. Candidates can now look up their seats." };
   } catch (error) {
     return { ok: false, message: error instanceof ApiError ? error.detail : "Could not publish the plan." };
