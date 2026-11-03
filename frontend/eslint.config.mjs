@@ -5,7 +5,15 @@ const config = [
   ...nextCoreWebVitals,
   ...nextTypescript,
   {
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "scripts/**"]
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "next-env.d.ts",
+      "scripts/**",
+      // Vendored Stageshow kit: third-party source, kept byte-for-byte apart
+      // from the type-safety fixes strict mode required.
+      "src/components/stage/kit/**"
+    ]
   }
 ];
 

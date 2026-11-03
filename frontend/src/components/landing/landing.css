@@ -1,0 +1,287 @@
+/* Landing hero demo: a hall board drawn in the product's own dark glass.
+   The stage IS the board — no plate under it, no margin on four sides — so it
+   reads as a product shot rather than a screenshot pasted into a card.
+   Scoped under .sd so none of it can leak into the workspace. */
+
+.sd .ss-stage {
+  --ss-canvas: oklch(16% 0 0);
+  --ss-surface: oklch(19% 0 0);
+  --ss-chrome: oklch(20% 0 0);
+  --ss-raised: oklch(24% 0 0);
+  --ss-text-strong: oklch(97% 0 0);
+  --ss-text: oklch(78% 0 0);
+  --ss-font: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --ss-mono: var(--font-geist-mono), ui-monospace, monospace;
+  overflow: hidden;
+  border-radius: 20px;
+  background: oklch(16% 0 0);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.14),
+    0 0 0 1px oklch(100% 0 0 / 0.09),
+    0 50px 90px -50px oklch(0% 0 0 / 0.95);
+}
+
+/* Light pooling from the top left, the same aurora the app runs behind
+   every page. */
+.sd .ss-stage::before {
+  content: "";
+  position: absolute;
+  inset: -40% 20% auto -20%;
+  height: 110%;
+  pointer-events: none;
+  background: radial-gradient(58% 100% at 34% 0%, oklch(62% 0 0 / 0.26), transparent 72%);
+}
+
+.sd-board {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.sd-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sd-title {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sd-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: oklch(97% 0 0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sd-meta {
+  font-family: var(--ss-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: oklch(66% 0 0);
+}
+
+.sd-pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: oklch(97% 0 0);
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: oklch(17% 0 0);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.5);
+  transition:
+    background-color 260ms var(--ease-out-soft),
+    color 260ms var(--ease-out-soft),
+    box-shadow 260ms var(--ease-out-soft);
+}
+
+/* Once the board is clean the badge goes quiet: the loud white is spent on
+   the one state that needs attention. */
+.sd-pill[data-ok] {
+  background: oklch(100% 0 0 / 0.06);
+  color: oklch(78% 0 0);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.16);
+}
+
+.sd-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.sd-grid {
+  display: grid;
+  flex: 1;
+  gap: 7px;
+  min-height: 0;
+}
+
+.sd-seat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 0;
+  border-radius: 8px;
+  background: var(--fill);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.4),
+    0 0 0 1px var(--rim);
+  transition:
+    opacity 180ms var(--ease-out-soft),
+    box-shadow 180ms var(--ease-out-soft);
+}
+
+.sd-seat[data-dim] {
+  opacity: 0.3;
+}
+
+/* A conflict has to read against whatever tint the tile happens to be, and the
+   palette runs right through coral. So the ring is near-white rather than red:
+   the red pill above carries the meaning, the ring carries the "here". */
+.sd-seat[data-flag] {
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.4),
+    0 0 0 2px oklch(16% 0 0),
+    0 0 0 4px oklch(97% 0 0);
+}
+
+.sd-seat[data-flag]::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: oklch(97% 0 0);
+  box-shadow: 0 0 0 2px oklch(16% 0 0);
+}
+
+.sd-seat-id {
+  font-family: var(--ss-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.sd-seat-code {
+  font-family: var(--ss-mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  opacity: 0.86;
+}
+
+.sd-seat--empty {
+  border-radius: 8px;
+  background: oklch(100% 0 0 / 0.035);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.08);
+  transition:
+    background-color 200ms var(--ease-out-soft),
+    box-shadow 200ms var(--ease-out-soft);
+}
+
+.sd-seat--empty[data-hot] {
+  background: oklch(100% 0 0 / 0.11);
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0 / 0.55),
+    0 0 20px oklch(100% 0 0 / 0.22);
+}
+
+.sd-seat-hint {
+  font-family: var(--ss-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: oklch(90% 0 0);
+  text-transform: uppercase;
+}
+
+/* The seat in flight. The script drives its position; the lift is CSS. */
+.sd-fly {
+  position: absolute;
+  z-index: 20;
+  width: 52px;
+  height: 46px;
+  margin: -23px 0 0 -26px;
+  pointer-events: none;
+  transition: none;
+  transform: translate(22px, 19px) scale(1.12) rotate(-2deg);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.4),
+    0 0 0 1px var(--rim),
+    0 18px 30px -12px oklch(0% 0 0 / 0.85);
+}
+
+.sd-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sd-note {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--ss-mono);
+  font-size: 10.5px;
+  color: oklch(66% 0 0);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sd-btn {
+  flex: none;
+  margin-left: auto;
+  border-radius: 10px;
+  background: oklch(100% 0 0 / 0.08);
+  padding: 8px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: oklch(80% 0 0);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.13);
+  transition:
+    background-color 220ms var(--ease-out-soft),
+    color 220ms var(--ease-out-soft),
+    box-shadow 220ms var(--ease-out-soft);
+}
+
+.sd-btn[data-ready] {
+  background: linear-gradient(140deg, oklch(99% 0 0), oklch(88% 0 0) 60%, oklch(78% 0 0));
+  color: oklch(17% 0 0);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.7),
+    0 0 0 1px oklch(100% 0 0 / 0.22);
+}
+
+/* Compact: the same board, tighter, with the footer note dropped rather than
+   squeezed. A second design, not the wide one scaled down. */
+.sd .ss-stage[data-layout="compact"] .sd-board {
+  gap: 11px;
+  padding: 13px;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-grid {
+  gap: 6px;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-name {
+  font-size: 12.5px;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-note {
+  display: none;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-btn {
+  margin-left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.sd .ss-stage[data-layout="compact"] .sd-foot {
+  justify-content: stretch;
+}
